@@ -1,8 +1,12 @@
-
+import { NavBar} from "./Components/NavBar"; 
+import { FirstUI } from "./Components/FirstUI";
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-dark-500 ">Welcome to HealthConnect!</h1>
+    <div className="min-h-screen flex flex-col bg-gray-600 border-solid border-blue-950 border-4 text-white">
+        <NavBar />
+        <main className="flex-grow">
+          <FirstUI />
+        </main>
     </div>
   );
 }
