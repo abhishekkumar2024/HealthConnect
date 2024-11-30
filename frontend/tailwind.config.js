@@ -2,10 +2,16 @@ module.exports = {
   content: [
     
     './public/index.html', // Include HTML file
-    './src/App.js', // Include all React component files
+    './src/App.js',
+    './src/Components/*', // Include all React component files
+    './src/utility/Cards.js'
   ],
   theme: {
+    // colors: {
+    //   cardtheme:"#a6a0a7",
+    // },
     extend: {},
   },
-  plugins: [],
+  plugins: [
+  ],
 };
