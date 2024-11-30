@@ -9,7 +9,7 @@ const NavBar = () => {
                 <a href="/login" className="text-xl">Login</a>
                 <a href="/Register" className="text-xl">Register</a>
                 <button className="text-xl">
-                   dark
+                   Dark
                 </button>
             </div>
         </nav>

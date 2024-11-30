@@ -5,7 +5,8 @@ module.exports = {
     './src/App.js',
     './src/Components/*', // Include all React component files
     './src/utility/Cards.js',
-    './src/utility/DoctorCard.js'
+    './src/utility/DoctorCard.js',
+    './src/utility/*'
   ],
   theme: {
     // colors: {
