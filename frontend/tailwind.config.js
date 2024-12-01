@@ -1,19 +1,17 @@
 module.exports = {
   content: [
-    
-    './public/index.html', // Include HTML file
+    './public/index.html',
+    './src/**/*.{js,jsx,ts,tsx}', // More comprehensive content path
     './src/App.js',
-    './src/Components/*', // Include all React component files
-    './src/utility/Cards.js',
-    './src/utility/DoctorCard.js',
-    './src/utility/*'
+    './src/Components/*',
+    './src/utility/*',
+    './src/pages/*'
   ],
   theme: {
-    // colors: {
-    //   cardtheme:"#a6a0a7",
-    // },
-    extend: {},
+    extend: {
+    },
   },
   plugins: [
+    // You can add Tailwind plugins here if needed
   ],
 };
