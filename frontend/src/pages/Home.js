@@ -1,6 +1,7 @@
 import { FirstUI } from "../Components/FirstUI";
 import { DoctorCard } from "../utility/DoctorCard";
 import { FeatureCard } from "../utility/FeatureCard";
+import { NavBar } from "../Components/NavBar";
 import {
   Stethoscope,
   Calendar,
@@ -10,6 +11,7 @@ import {
 const Home = () => {
     return (
         <main className="flex-grow mx-16 flex flex-col justify-center">
+            <NavBar />
             <FirstUI />
             <h1 className="justify-center items-center text-start ml-4 mt-36 text-3xl font-bold font-sans">Doctor list</h1>
             <div className="flex-row flex-wrap flex px-3 py-4 gap-4">
