@@ -9,7 +9,7 @@ import {
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login"
 import { Register } from "./pages/Register";
-
+import { ResetPassword } from "./pages/ResetPassword";
 function App() {
   return (
     <Router>
@@ -19,6 +19,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />}/>
             <Route path="/Register" element={<Register />} />
+            <Route path="/forgot-password" element={<ResetPassword />} />
             </Routes>
           </div>
         </div>
