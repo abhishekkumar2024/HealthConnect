@@ -2,29 +2,28 @@ import { useState } from "react";
 import { FirstDivClass } from "../utilities/className";
 import { CardDivClass } from "../utilities/className";
 import { Button } from "../utilities/Button";
-import { isValidPhoneOrEmail } from "../utilities/Validation"; // Import utility
+import { isValidPhoneOrEmail } from "../utilities/Validation";
+import { registerAPI } from "../api/auth.api.js";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [selectedRole, setSelectedRole] = useState("Select Role");
   const [showRole, setShowRole] = useState(false);
   const [phoneOrEmailValue, setPhoneOrEmailValue] = useState("");
   const [emailOrPhoneError, setEmailOrPhoneError] = useState("");
-  const [isPhoneOrEmailValid, setIsPhoneOrEmailValid] = useState(true); // Tracks validity
-
+  const [isPhoneOrEmailValid, setIsPhoneOrEmailValid] = useState(true);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordMatch, setIsPasswordMatch] = useState(true); // Tracks password match
+  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
 
-  // Role options
+  const navigate = useNavigate()
   const roles = ["Admin", "Doctor", "Patient"];
 
-  // Handle role selection
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
-    setShowRole(false); // Close dropdown after selection
+    setShowRole(false);
   };
 
-  // Handle email or phone validation
   const handlePhoneOrEmailChange = (value) => {
     setPhoneOrEmailValue(value);
     const result = isValidPhoneOrEmail(value);
@@ -32,15 +31,48 @@ const Register = () => {
     setEmailOrPhoneError(result.error);
   };
 
-  // Handle password matching
   const handlePasswordChange = (value) => {
     setPassword(value);
-    setIsPasswordMatch(value === confirmPassword); // Check match on password change
+    setIsPasswordMatch(value === confirmPassword);
   };
 
   const handleConfirmPasswordChange = (value) => {
     setConfirmPassword(value);
-    setIsPasswordMatch(value === password); // Check match on confirmPassword change
+    setIsPasswordMatch(value === password);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!isPhoneOrEmailValid || !isPasswordMatch || selectedRole === "Select Role") {
+      alert("please enter empty field! ")
+      return;
+    }
+
+    const formData = {
+      phoneOrEmail: phoneOrEmailValue,
+      password: password,
+      role: selectedRole
+    };
+
+    try {
+      const response = await registerAPI(formData)
+      console.log(response)
+      alert(response.data.message)
+      if (response.status === 201) {
+        // Handle successful registration
+        navigate('/login')
+        console.log('Registration successful');
+
+      } else {
+        // Handle registration error
+        console.error('Registration failed');
+
+      }
+    } catch (error) {
+      alert(error.response.data.message)
+      console.error('Error:', error);
+    }
   };
 
   return (
@@ -49,8 +81,7 @@ const Register = () => {
         <h1 className="text-blue-950 text-center font-semibold text-2xl my-4">
           Join Us at HealthConnect
         </h1>
-        <div className="flex-col justify-between items-center w-full space-y-4">
-          {/* Input for Phone or Email */}
+        <form onSubmit={handleSubmit} className="flex-col justify-between items-center w-full space-y-4">
           <div className="flex flex-col">
             <input
               type="text"
@@ -66,7 +97,6 @@ const Register = () => {
             )}
           </div>
 
-          {/* Input for Password */}
           <div className="flex flex-col">
             <input
               type="password"
@@ -77,7 +107,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Input for Confirm Password */}
           <div className="flex flex-col">
             <input
               type="password"
@@ -93,9 +122,9 @@ const Register = () => {
             )}
           </div>
 
-          {/* Dropdown for Role Selection */}
           <div className="flex justify-center items-center relative w-full">
             <button
+              type="button"
               className="w-full flex justify-between items-center px-3 py-2 bg-white ring-1 ring-slate-700 rounded-sm text-black focus:outline-none"
               onClick={() => setShowRole(!showRole)}
             >
@@ -105,6 +134,7 @@ const Register = () => {
               <div className="absolute top-full mt-1 w-full bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
                 {roles.map((role) => (
                   <button
+                    type="button"
                     key={role}
                     onClick={() => handleRoleSelect(role)}
                     className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
@@ -116,9 +146,8 @@ const Register = () => {
             )}
           </div>
 
-          {/* Register Button */}
-          <Button name="Register" />
-        </div>
+          <Button type="submit" name="Register" />
+        </form>
       </div>
     </div>
   );
