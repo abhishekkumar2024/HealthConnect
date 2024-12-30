@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { FirstDivClass } from "../utilities/className";
-import { CardDivClass } from "../utilities/className";
-import { Button } from "../utilities/Button";
+import { Mail, Lock, User } from 'lucide-react';
+import { useNavigate, Link } from "react-router-dom";
 import { isValidPhoneOrEmail } from "../utilities/Validation";
 import { registerAPI } from "../api/auth.api.js";
-import { useNavigate } from "react-router-dom";
+import { useDarkMode } from "../contextAPI/contextApi";
 
 const Register = () => {
   const [selectedRole, setSelectedRole] = useState("Select Role");
@@ -16,8 +15,9 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const roles = ["Admin", "Doctor", "Patient"];
+  const { themeStyles } = useDarkMode();
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
@@ -43,101 +43,93 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isPhoneOrEmailValid || !isPasswordMatch || selectedRole === "Select Role") {
-      alert("please enter empty field! ")
+      alert("Please fill all fields correctly!");
       return;
     }
 
-    const formData = {
-      phoneOrEmail: phoneOrEmailValue,
-      password: password,
-      role: selectedRole
-    };
-
     try {
-      const response = await registerAPI(formData)
-      console.log(response)
-      alert(response.data.message)
+      const response = await registerAPI({
+        phoneOrEmail: phoneOrEmailValue,
+        password: password,
+        role: selectedRole
+      });
+
+      alert(response.data.message);
       if (response.status === 201) {
-        // Handle successful registration
-        navigate('/login')
-        console.log('Registration successful');
-
-      } else {
-        // Handle registration error
-        console.error('Registration failed');
-
+        navigate('/login');
       }
     } catch (error) {
-      alert(error.response.data.message)
-      console.error('Error:', error);
+      alert(error.response?.data?.message || "Registration failed");
     }
   };
 
   return (
-    <div className={FirstDivClass}>
-      <div className={CardDivClass}>
-        <h1 className="text-blue-950 text-center font-semibold text-2xl my-4">
-          Join Us at HealthConnect
-        </h1>
-        <form onSubmit={handleSubmit} className="flex-col justify-between items-center w-full space-y-4">
-          <div className="flex flex-col">
+    <div className={`min-h-screen ${themeStyles.background} flex items-center justify-center p-4 transition-colors duration-300`}>
+      <div className={`${themeStyles.cardBg} backdrop-blur-lg rounded-2xl p-8 w-full max-w-md`}>
+        <div className="text-center mb-8">
+          <h1 className={`text-3xl font-bold ${themeStyles.text} mb-2`}>Create Account</h1>
+          <p className={themeStyles.subtext}>Join HealthConnect today</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="relative">
+            <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 ${themeStyles.iconColor}`} size={20} />
             <input
               type="text"
               value={phoneOrEmailValue}
               placeholder="Phone Number or Email ID"
-              className={`placeholder-blue-900 rounded-sm ring-1 bg-transparent text-black px-3 py-2 w-full ${
-                isPhoneOrEmailValid ? "ring-slate-700" : "ring-red-500"
-              }`}
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder}`}
               onChange={(e) => handlePhoneOrEmailChange(e.target.value)}
             />
-            {!isPhoneOrEmailValid && (
-              <p className="text-red-500 text-sm mt-1">{emailOrPhoneError}</p>
+            {!isPhoneOrEmailValid && phoneOrEmailValue && (
+              <p className="text-red-400 text-sm mt-1">{emailOrPhoneError}</p>
             )}
           </div>
 
-          <div className="flex flex-col">
+          <div className="relative">
+            <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 ${themeStyles.iconColor}`} size={20} />
             <input
               type="password"
               value={password}
               placeholder="Password"
-              className="placeholder-blue-900 rounded-sm ring-1 ring-slate-700 bg-transparent text-black px-3 py-2 w-full"
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder}`}
               onChange={(e) => handlePasswordChange(e.target.value)}
             />
           </div>
 
-          <div className="flex flex-col">
+          <div className="relative">
+            <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 ${themeStyles.iconColor}`} size={20} />
             <input
               type="password"
               value={confirmPassword}
               placeholder="Confirm Password"
-              className={`placeholder-blue-900 rounded-sm ring-1 bg-transparent text-black px-3 py-2 w-full ${
-                isPasswordMatch ? "ring-slate-700" : "ring-red-500"
-              }`}
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder}`}
               onChange={(e) => handleConfirmPasswordChange(e.target.value)}
             />
-            {!isPasswordMatch && (
-              <p className="text-red-500 text-sm mt-1">Passwords do not match</p>
+            {!isPasswordMatch && confirmPassword && (
+              <p className="text-red-400 text-sm mt-1">Passwords do not match</p>
             )}
           </div>
 
-          <div className="flex justify-center items-center relative w-full">
+          <div className="relative">
+            <User className={`absolute left-3 top-1/2 -translate-y-1/2 ${themeStyles.iconColor}`} size={20} />
             <button
               type="button"
-              className="w-full flex justify-between items-center px-3 py-2 bg-white ring-1 ring-slate-700 rounded-sm text-black focus:outline-none"
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} text-left focus:outline-none ${themeStyles.inputBorder}`}
               onClick={() => setShowRole(!showRole)}
             >
               {selectedRole}
             </button>
             {showRole && (
-              <div className="absolute top-full mt-1 w-full bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+              <div className="absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg z-10">
                 {roles.map((role) => (
                   <button
                     type="button"
                     key={role}
                     onClick={() => handleRoleSelect(role)}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-4 py-2 text-left hover:bg-blue-50 text-gray-700"
                   >
                     {role}
                   </button>
@@ -146,8 +138,22 @@ const Register = () => {
             )}
           </div>
 
-          <Button type="submit" name="Register" />
+          <button
+            type="submit"
+            className={`w-full ${themeStyles.buttonBg} ${themeStyles.buttonHoverBg} text-white font-semibold py-3 rounded-lg transition duration-300`}
+          >
+            Create Account
+          </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className={themeStyles.subtext}>
+            Already have an account?{" "}
+            <Link to="/login" className={`${themeStyles.linkHover} font-semibold`}>
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

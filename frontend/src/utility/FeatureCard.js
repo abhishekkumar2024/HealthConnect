@@ -13,4 +13,4 @@ const FeatureCard = ({ icon: Icon, title, description}) => {
         </div>
     )
 }
-export {FeatureCard}
+export { FeatureCard }
