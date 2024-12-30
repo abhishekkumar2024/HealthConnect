@@ -6,10 +6,12 @@ import {
   Link, 
   Navigate 
 } from 'react-router-dom';
-import { Home } from "./pages/Home";
+import { Home } from "./pages/Home"
 import { Login } from "./pages/Login"
+import { PatientDashboard } from "./pages/feed"
 import { Register } from "./pages/Register";
-import { ResetPassword } from "./pages/ResetPassword";
+import { ResetPassword } from "./pages/ResetPassword"
+import { PatientProfileDetails } from "./pages/UserProfileDetails.js";
 function App() {
   return (
     <Router>
@@ -19,7 +21,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />}/>
             <Route path="/Register" element={<Register />} />
+            <Route path="/patient/:id" element={<PatientDashboard />} />
+            {/* <Route path="/doctor/:id" element={<DoctorDashboard />} /> */}
             <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path= "/profile/:id" element={< PatientProfileDetails />} />
             </Routes>
           </div>
         </div>
