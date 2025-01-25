@@ -1,116 +1,221 @@
-import User from '../models/user.model.js'
+import { Patient } from '../models/patient.model.js';
+import { Doctor } from '../models/doctor.model.js';
+import User from '../models/user.model.js';
 import { refreshTokenAndAccessToken } from '../utilities/refreshTokenAndAccessToken.js';
+import twilio from 'twilio';
+import { ApiErrors } from '../utilities/ApiError.js';
+import { ApiResponse } from '../utilities/ApiResponse.js';
 
-const RegisterUser = async (req,  res) => {
-    const user = req.body;
-    console.log(typeof (req.body))
-    const { role, password, phoneOrEmail } = user
-    if (!user || !role || !password || !phoneOrEmail) {
-        return res.status(409).json({ message: "please provide all require credential !" })
-    }
+const twilioClient = twilio(
+    process.env.your_twilio_account_sid,
+    process.env.your_twilio_auth_token
+);
+const TWILIO_PHONE_NUMBER = process.env.your_twilio_phone_number;
 
-    const isUserExist = await User.findOne({
-        $or: [
-            { phone: phoneOrEmail },
-            { email: phoneOrEmail }
-        ]
-    });
+const RegisterUser = async (req, res) => {
+    try {
+        const { role, password, email } = req.body;
+        console.log(role, password, email)
 
-
-    if (isUserExist) {
-        return res.status(409).json({ message: "User already exists with the given credentials." })
-    }
-
-    const newUser = new User(
-        {
-            password: password,
-            phone: phoneOrEmail ? phoneOrEmail : null,
-            email: phoneOrEmail ? phoneOrEmail : null
+        if (!req.body || !role || !password || !email) {
+            throw new ApiErrors(400, "Please provide all required credentials!");
         }
-    )
 
-    const savedUser = await newUser.save()
+        const UserModel = role === "Patient" ? Patient : Doctor;
 
-    return res.status(201).json({
-        message: "User registered successfully.",
-        user: { id: savedUser._id, role: savedUser.role }
-    });
-}
+        const isUserExist = await UserModel.findOne({
+            $or: [{ email: email }]
+        });
+
+        if (isUserExist) {
+            throw new ApiErrors(409, "User already exists with the given credentials.");
+        }
+
+        const newUser = new UserModel({
+            password,
+            email,
+            role
+        });
+
+        const savedUser = await newUser.save({ validateBeforeSave: true });
+
+        return res
+            .status(201)
+            .json(
+                new ApiResponse(
+                    200,
+                    { id: savedUser._id, role: savedUser.role },
+                    `${role} registered successfully.`
+                )
+            );
+    } catch (error) {
+        if (error instanceof ApiErrors) {
+            throw error;
+        }
+        throw new ApiErrors(500, "Error while registering user", error.message);
+    }
+};
 
 const LoginUser = async (req, res) => {
     try {
-        // console.log("x")
-        const { phoneOrEmailIdvalue, password } = req.body;
+        const { email, password } = req.body;
 
-        if (!phoneOrEmailIdvalue || !password) {
-            return res.status(409).json({ message: "Please fill in the credentials!" });
+        if (!email || !password) {
+            throw new ApiErrors(400, "Please fill in the credentials!");
         }
 
         const user = await User.findOne({
-            $or: [
-                { email: phoneOrEmailIdvalue },
-                { phone: phoneOrEmailIdvalue }
-            ]
+            $or: [{ email: email }]
         });
 
         if (!user) {
-            return res.status(404).json({ message: "User not found." });
+            throw new ApiErrors(404, "User not found.");
         }
 
         const isPasswordCorrect = await user.isPasswordCorrect(password);
-        // console.log(isPasswordCorrect)
+
         if (!isPasswordCorrect) {
-            return res.status(409).json({ message: "Password is incorrect!" });
+            throw new ApiErrors(401, "Invalid credentials");
         }
 
         const { refreshToken, accessToken } = await refreshTokenAndAccessToken(user._id);
-
         const loggedInUser = await User.findById(user._id).select("-refreshToken -password");
 
         const options = {
             httpOnly: true,
-            secure: false, // true in production
+            secure: true,
             sameSite: 'strict',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            // domain: process.env.NODE_ENV === 'production' ? 'yourwebsite.com' : 'localhost',
+            maxAge: 24 * 60 * 60 * 1000,
             path: '/'
         };
-
-        res.cookie("accessToken", accessToken, options)
-           .cookie("refreshToken", refreshToken, options)
-
-           
-            res.status(200)
-            .json({
-                message: "Successfully logged in!",
-                user: loggedInUser
-                // refreshToken: refreshToken,
-                // accessToken: accessToken
-            });
-        // console.log(res.getHeaders()["set-cookie"]);
+        return res
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    { user: loggedInUser },
+                    "Successfully logged in!"
+                )
+            );
     } catch (error) {
-        return res.status(500).json({ message: "Server error.", error: error.message });
+        if (error instanceof ApiErrors) {
+            throw error;
+        }
+        throw new ApiErrors(500, "Error while logging in", error.message);
     }
 };
 
 const LogoutUser = async (req, res) => {
-    console.log("x")
-    const options = {
-        httpOnly: true,
-        secure: false, // true in production
-        sameSite: 'strict',
-        maxAge: 0,
-        // domain: process.env.NODE_ENV === 'production' ? 'yourwebsite.com' : 'localhost',
-    }
     try {
-        // console.log(req.cookies.refreshToken)
-        res.clearCookie("accessToken")
-           .clearCookie("refreshToken")
-           .status(200)
-           .json({ message: "Logged out successfully!" });
-    } catch (error) {
-        return res.status(500).json({ message: "Server error.", error: error.message });
-    }
-}
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: 'strict',
+            maxAge: 0,
+        };
 
-export { RegisterUser, LoginUser, LogoutUser }
+        return res
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    {},
+                    "Logged out successfully!"
+                )
+            );
+    } catch (error) {
+        throw new ApiErrors(500, "Error while logging out", error.message);
+    }
+};
+
+const SentOTP = async (req, res) => {
+    try {
+        const { phoneOrEmail } = req.body;
+
+        if (!phoneOrEmail) {
+            throw new ApiErrors(400, "Please enter the phone or email!");
+        }
+
+        const user = await User.findOne({
+            $or: [
+                { email: phoneOrEmail },
+                { phone: phoneOrEmail }
+            ]
+        });
+
+        if (!user) {
+            throw new ApiErrors(404, "User not found!");
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        user.otp = otp;
+        await user.save({ validateBeforeSave: false });
+
+        try {
+            const verification = await twilioClient.verify.v2
+                .services("VAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                .verifications.create({
+                    channel: "sms",
+                    to: `+91${phoneOrEmail}`,
+                });
+
+            if (verification.status === "pending") {
+                return res
+                    .status(200)
+                    .json(
+                        new ApiResponse(
+                            200,
+                            { status: verification.status },
+                            "OTP sent successfully!"
+                        )
+                    );
+            } else {
+                throw new ApiErrors(500, "Failed to send OTP");
+            }
+        } catch (twilioError) {
+            throw new ApiErrors(500, "Error sending OTP through Twilio", twilioError.message);
+        }
+    } catch (error) {
+        if (error instanceof ApiErrors) {
+            throw error;
+        }
+        throw new ApiErrors(500, "Error while sending OTP", error.message);
+    }
+};
+
+const SendUserId = async (req, res) => {
+    try {
+        const user = req.user;
+        
+        if (!user) {
+            throw new ApiErrors(404, "User not found");
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    { user },
+                    "User details fetched successfully"
+                )
+            );
+    } catch (error) {
+        if (error instanceof ApiErrors) {
+            throw error;
+        }
+        throw new ApiErrors(500, "Error while fetching user details", error.message);
+    }
+};
+
+export {
+    RegisterUser,
+    LoginUser,
+    LogoutUser,
+    SentOTP,
+    SendUserId
+};

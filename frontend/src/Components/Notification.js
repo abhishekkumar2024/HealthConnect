@@ -47,7 +47,7 @@ const NotificationQueue = () => {
       {/* Notification Bell */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded-full hover:${themeStyles.iconHoverBg} ${themeStyles.iconColor}`}
+        className={`p-2 rounded-full ${themeStyles.iconHoverBg} ${themeStyles.iconColor} ${themeStyles.buttonHoverBg}`}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (

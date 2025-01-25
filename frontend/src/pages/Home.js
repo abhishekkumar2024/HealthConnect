@@ -1,7 +1,4 @@
-import { LandingPage } from "../Components/FirstUI";
-import { DoctorCard } from "../utility/DoctorCard";
-import { FeatureCard } from "../utility/FeatureCard";
-import { NavBar } from "../Components/NavBar";
+import { LandingPage } from "./Landing";
 import {
   Stethoscope,
   Calendar,

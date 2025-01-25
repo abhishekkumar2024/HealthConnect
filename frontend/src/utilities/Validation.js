@@ -1,17 +1,21 @@
-const isValidPhoneOrEmail = (value) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phonePattern = /^[0-9]{10}$/;
-  
-    if (value.length === 0) {
-      return { isValid: false, error: "Input cannot be empty." };
-    } else if (emailPattern.test(value)) {
-      return { isValid: true, error: "" }; // Valid email
-    } else if (phonePattern.test(value)) {
-      return { isValid: true, error: "" }; // Valid phone
-    } else {
-      return { isValid: false, error: "Invalid Phone or Email ID." };
-    }
-  };
-  
-  export { isValidPhoneOrEmail };
-  
+const validateFields = ({email,name,pincode,phone}) => {
+  const errors = {};
+  console.log(email)
+  if (!email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    errors.email = "Invalid email format";
+  }
+
+  // if (!name) errors.name = "Name is required";
+
+  if (phone && !phone.match(/^\d{10}$/)) {
+    errors.phone = "Invalid phone number format";
+  }
+  if (pincode && !String(pincode).match(/^\d{6}$/)) {
+    errors.pincode = "Invalid PIN code format";
+  }
+  console.log(errors)
+  return errors;
+};
+
+
+export { validateFields };

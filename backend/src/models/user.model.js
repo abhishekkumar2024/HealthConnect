@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema(
         phone: {
             type: String,
             unique: true,
-            sparse: true, // Allows the field to be optional with uniqueness
+            sparse: true,
         },
         password: {
             type: String,
@@ -24,8 +24,8 @@ const UserSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ["patient", "doctor", "admin"],
-            default: "patient",
+            enum: ["Patient", "Doctor", "Admin"],
+            default: "Patient",
         },
         refreshToken: {
             type: String,
@@ -47,46 +47,6 @@ const UserSchema = new mongoose.Schema(
         gender: {
             type: String,
             enum: ["male", "female", "other"],
-            // default: "Please select",
-        },
-        bloodgroup: {
-            type: String,
-            enum: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
-            // default: "Unknown",
-        },
-        weight: {
-            type: Number,
-            min: 0,
-            default: 0
-        },
-        height: {
-            type: Number,
-            min: 0,
-            default: 0
-        },
-        address: {
-            type: String,
-            trim: true,
-            address: "Unknown",
-        },
-        city: {
-            type: String,
-            trim: true,
-            default: "Unknown",
-        },
-        state: {
-            type: String,
-            trim: true,
-            default: "Unknown",
-        },
-        country: {
-            type: String,
-            trim: true,
-            default: "Unknown",
-        },
-        pincode: {
-            type: Number,
-            default: 0,
         },
         profilepic: {
             type: String,
@@ -104,17 +64,15 @@ const UserSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        bmi: {
-            type: Number,
-            default: 0,
-        },
-        healthid: {
+        otp: {
             type: String,
-            unique: true,
             default: "",
         },
     },
-    { timestamps: true }
+    { 
+        timestamps: true,
+        discriminatorKey: 'userType' // This allows us to create different user types
+    }
 );
 
 // Pre-save hook for hashing passwords

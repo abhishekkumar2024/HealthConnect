@@ -6,7 +6,8 @@ module.exports = {
     './src/Components/*',
     './src/utility/*',
     './src/pages/*',
-    './src/utilities/*'
+    './src/utilities/*',
+    './src/contextAPI/*'
   ],
   theme: {
     extend: {

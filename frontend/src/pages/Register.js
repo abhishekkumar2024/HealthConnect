@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Mail, Lock, User } from 'lucide-react';
 import { useNavigate, Link } from "react-router-dom";
-import { isValidPhoneOrEmail } from "../utilities/Validation";
+import { validateFields } from "../utilities/Validation";
 import { registerAPI } from "../api/auth.api.js";
 import { useDarkMode } from "../contextAPI/contextApi";
 
 const Register = () => {
   const [selectedRole, setSelectedRole] = useState("Select Role");
   const [showRole, setShowRole] = useState(false);
-  const [phoneOrEmailValue, setPhoneOrEmailValue] = useState("");
-  const [emailOrPhoneError, setEmailOrPhoneError] = useState("");
-  const [isPhoneOrEmailValid, setIsPhoneOrEmailValid] = useState(true);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [isValidEmail, setValidEmail] = useState(true);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
@@ -25,10 +25,13 @@ const Register = () => {
   };
 
   const handlePhoneOrEmailChange = (value) => {
-    setPhoneOrEmailValue(value);
-    const result = isValidPhoneOrEmail(value);
-    setIsPhoneOrEmailValid(result.isValid);
-    setEmailOrPhoneError(result.error);
+    console.log(value)
+    setEmail(value);
+    // console.log(email)
+    // console.log("x")
+    const result = validateFields({ email: value });
+    // setEmail(result.isValid);
+    setEmailError(result.error);
   };
 
   const handlePasswordChange = (value) => {
@@ -44,14 +47,15 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isPhoneOrEmailValid || !isPasswordMatch || selectedRole === "Select Role") {
+    if (!isValidEmail || !isPasswordMatch || selectedRole === "Select Role") {
       alert("Please fill all fields correctly!");
       return;
     }
 
     try {
+      console.log(email)
       const response = await registerAPI({
-        phoneOrEmail: phoneOrEmailValue,
+        email: email,
         password: password,
         role: selectedRole
       });
@@ -78,13 +82,13 @@ const Register = () => {
             <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 ${themeStyles.iconColor}`} size={20} />
             <input
               type="text"
-              value={phoneOrEmailValue}
-              placeholder="Phone Number or Email ID"
-              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder}`}
+              value={email}
+              placeholder="Email ID"
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder} ${themeStyles.text}`}
               onChange={(e) => handlePhoneOrEmailChange(e.target.value)}
             />
-            {!isPhoneOrEmailValid && phoneOrEmailValue && (
-              <p className="text-red-400 text-sm mt-1">{emailOrPhoneError}</p>
+            {!isValidEmail && email && (
+              <p className="text-red-400 text-sm mt-1">{emailError}</p>
             )}
           </div>
 
@@ -94,7 +98,7 @@ const Register = () => {
               type="password"
               value={password}
               placeholder="Password"
-              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder}`}
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder} ${themeStyles.text}`}
               onChange={(e) => handlePasswordChange(e.target.value)}
             />
           </div>
@@ -105,7 +109,7 @@ const Register = () => {
               type="password"
               value={confirmPassword}
               placeholder="Confirm Password"
-              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder}`}
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} focus:outline-none ${themeStyles.inputBorder} ${themeStyles.text}`}
               onChange={(e) => handleConfirmPasswordChange(e.target.value)}
             />
             {!isPasswordMatch && confirmPassword && (
@@ -117,7 +121,7 @@ const Register = () => {
             <User className={`absolute left-3 top-1/2 -translate-y-1/2 ${themeStyles.iconColor}`} size={20} />
             <button
               type="button"
-              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} text-left focus:outline-none ${themeStyles.inputBorder}`}
+              className={`w-full ${themeStyles.inputBg} border ${themeStyles.borderColor} rounded-lg py-3 px-12 ${themeStyles.inputText} text-left focus:outline-none ${themeStyles.inputBorder} ${themeStyles.text}`}
               onClick={() => setShowRole(!showRole)}
             >
               {selectedRole}
