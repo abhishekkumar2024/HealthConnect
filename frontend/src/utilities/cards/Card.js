@@ -1,19 +1,19 @@
-import { useDarkMode } from "../contextAPI/contextApi";
+import { useDarkMode } from "../../contextAPI/contextApi";
 import * as React from "react"
 import { cva } from "class-variance-authority"
 import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react"
 
 
-const FirstTitleCard = ({childern})=>{
-    return (
-        <div className="flex flex-col justify-center items-center space-y-7 ">
-            <h3 className="font-bold text-2xl">
-               Hello Good afterNoon, WellCome to HealthConnect
-            </h3>
-            <p1 className="bg-zinc-700 text-wrap px-6 py-9 w-1/2 text-xl rounded-lg shadow-xl">
-                your all-in-one healthcare companion! <span className=" px-1 bg-slate-600 border-1 rounded-md"> <a href="">Streamline appointments</a> </span>, manage medical records securely, and connect with top-rated doctors—all from one intuitive platform. Experience the future of healthcare, where care meets convenience, and your health is always in your hands.</p1>
-        </div>
-    );
+const FirstTitleCard = ({ childern }) => {
+  return (
+    <div className="flex flex-col justify-center items-center space-y-7 ">
+      <h3 className="font-bold text-2xl">
+        Hello Good afterNoon, WellCome to HealthConnect
+      </h3>
+      <p1 className="bg-zinc-700 text-wrap px-6 py-9 w-1/2 text-xl rounded-lg shadow-xl">
+        your all-in-one healthcare companion! <span className=" px-1 bg-slate-600 border-1 rounded-md"> <a href="">Streamline appointments</a> </span>, manage medical records securely, and connect with top-rated doctors—all from one intuitive platform. Experience the future of healthcare, where care meets convenience, and your health is always in your hands.</p1>
+    </div>
+  );
 }
 
 const Card = ({ children, className = '' }) => {
@@ -73,7 +73,7 @@ const alertVariants = cva(
         default: "bg-background text-foreground",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-        success: 
+        success:
           "border-green-500/50 text-green-600 dark:text-green-400 [&>svg]:text-green-600 dark:[&>svg]:text-green-400",
         info:
           "border-blue-500/50 text-blue-600 dark:text-blue-400 [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400",
@@ -128,5 +128,47 @@ const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
 ))
 AlertDescription.displayName = "AlertDescription"
 
+// button.jsx
+const Button = ({ children, variant = "default", className, ...props }) => {
+  const baseStyles = "px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50";
 
-export { FirstTitleCard, Card, StatCard, CardHeader, CardTitle, CardContent,  Alert, AlertTitle, AlertDescription };
+  const variants = {
+    default: "bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700",
+    outline: "border border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-200",
+    ghost: "hover:bg-gray-100 dark:hover:bg-gray-800",
+    destructive: "bg-red-500 hover:bg-red-600 text-white"
+  };
+
+  return (
+    <button
+      className={`${baseStyles} ${variants[variant]} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+// badge.jsx
+const Badge = ({ children, variant = "default", className, ...props }) => {
+  const baseStyles = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
+
+  const variants = {
+    default: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
+    success: "bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-200",
+    warning: "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200",
+    error: "bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-200",
+    info: "bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-200"
+  };
+
+  return (
+    <span
+      className={`${baseStyles} ${variants[variant]} ${className}`}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+};
+
+export { FirstTitleCard, Card, StatCard, CardHeader, CardTitle, CardContent, Alert, AlertTitle, AlertDescription, Button, Badge };

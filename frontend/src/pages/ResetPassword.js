@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { FirstDivClass, CardDivClass } from "../utilities/className";
 import { Button } from "../utilities/Button";
-import { isValidPhoneOrEmail } from "../utilities/Validation";
+import { validateFields } from "../utilities/Validation";
+import { SentOTPAPI } from "../api/auth.api";
 
 const ResetPassword = () => {
     const [OTPFlag, setOTPFlag] = useState(false);
@@ -11,11 +12,33 @@ const ResetPassword = () => {
     const [isPhoneOrEmailValid, setIsPhoneOrEmailValid] = useState(true); // Tracks validity
     const handlePhoneOrEmailChange = (value) => {
         setPhoneOrEmailValue(value);
-        const result = isValidPhoneOrEmail(value); 
+        const result = validateFields({ email : value}); 
         setIsPhoneOrEmailValid(result.isValid);
         setEmailOrPhoneError(result.error);
     };
 
+    const sentOTPHandler = async (e) => {
+        e.preventDefault();
+        try {
+            if (isPhoneOrEmailValid) {
+                // Call the API to send OTP
+                const Response = await SentOTPAPI({ phoneOrEmail: phoneOrEmailValue });
+                if(Response.status === 200){
+                    setOTPFlag(true);
+                }
+                else{
+                    alert("Failed to send OTP!");
+                    // reset the OTP flag and all values
+                    setOTP('');
+                    setOTPFlag(false);
+                    setPhoneOrEmailValue('');
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to send OTP!");
+        }
+    }
     return (
         <div className={FirstDivClass}>
             <div className={CardDivClass}>
@@ -44,11 +67,11 @@ const ResetPassword = () => {
                                 onChange={(e) => { handlePhoneOrEmailChange(e.target.value) }}
                             />
                         </div>
-                        {
+                        {/* {
                             (!isPhoneOrEmailValid) &&
                             (<p className="text-red-500 text-sm mt-1">{emailOrPhoneError}</p>)
-                        }
-                        <Button name="Verify" onClick={() => setOTPFlag(true)} />
+                        } */}
+                        <Button name="Verify" onClick={ sentOTPHandler } />
                     </div>
                 ) : (
                     <div className="flex-col justify-between items-center w-full space-y-4">

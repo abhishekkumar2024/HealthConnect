@@ -1,7 +1,7 @@
 import { Search, Bell, Sun, Moon } from 'lucide-react';
 import { useState } from 'react';
 import { useDarkMode } from '../contextAPI/contextApi';
-import { UserProfileMenu } from './profile.js';
+import { UserProfileMenu } from './Profile.js';
 import { NotificationQueue } from './Notification.js';
 
 const NavBar = () => {
@@ -34,7 +34,7 @@ const NavBar = () => {
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full hover:${themeStyles.buttonHoverBg} ${themeStyles.iconColor}`}
+              className={`p-2 rounded-full ${themeStyles.buttonHoverBg} ${themeStyles.iconColor}`}
               aria-label="Toggle Dark Mode"
             >
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

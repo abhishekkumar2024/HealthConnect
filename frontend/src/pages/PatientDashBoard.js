@@ -4,25 +4,25 @@ import { NavBar } from '../Components/NavBar';
 import { useDarkMode } from '../contextAPI/contextApi';
 import { PatientDashboardAPI } from '../api/auth.api';
 import { useParams } from 'react-router-dom';
+import { Footer } from '../Components/Footer';
+import { DoctorCard } from '../Components/DoctorCard';
 
 const PatientDashboard = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [hoveredId, setHoveredId] = useState(null);
-    const { isDarkMode, toggleDarkMode, themeStyles } = useDarkMode();
+    const { themeStyles } = useDarkMode();
     const [profileData, setProfileData] = useState(null);
 
 
     const id = useParams()
+
     useEffect(() => {
         const fetchPatientData = async () => {
           try {
-            const token = sessionStorage.getItem("accessToken"); // Retrieve token
+            // const token = sessionStorage.getItem("accessToken"); // Retrieve token
             
-            const response = await PatientDashboardAPI(id, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-
-            
+            const response = await PatientDashboardAPI(id);
+            console.log(response)
             setProfileData(response.data);
           } catch (error) {
             console.error("Error fetching patient data:", error);
@@ -122,7 +122,7 @@ const PatientDashboard = () => {
                     </div>
 
                     {/* Carousel Container */}
-                    <div className="relative">
+                    <div className="relative flex flex-wrap">
                         {/* Navigation Buttons */}
                         <button
                             onClick={prevSlide}
@@ -210,8 +210,18 @@ const PatientDashboard = () => {
                             />
                         ))}
                     </div>
+                    <h3 className='text-white flex justify-center mt-8 gap-2'> Available Doctor </h3>
+                    <div className= {`flex justify-center mt-8 gap-4 flex-wrap`}>
+                        <DoctorCard/>
+                        <DoctorCard/>
+                        <DoctorCard/>
+                        <DoctorCard/>
+                        <DoctorCard/>
+                        <DoctorCard/>
+                    </div>
                 </div>
             </div>
+            <Footer/>
         </>
     );
 };
