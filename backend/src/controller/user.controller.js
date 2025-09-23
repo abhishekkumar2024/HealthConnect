@@ -59,7 +59,6 @@ const RegisterUser = async (req, res) => {
 const LoginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-
         if (!email || !password) {
             throw new ApiErrors(400, "Please fill in the credentials!");
         }

@@ -11,12 +11,16 @@ const router = Router()
 
 router.route("/register").post(RegisterUser);
 router.route("/login").post(LoginUser);
-router.route("/patient-dashboard/:id").get(verifyJWT,LoginUser);
+// router.route("/patient-dashboard/:id").get(verifyJWT,LoginUser);
 router.route("/logout").get(verifyJWT,LogoutUser);
+
 router.route("/Patientprofile").get(verifyJWT,PatientProfile);
+
 router.route("/Doctorprofile").get(verifyJWT,DoctorProfile);
 router.route("/save-profile").post(verifyJWT,SavePatientData);
+
 router.route("/save-doctor-profile").post(verifyJWT,SaveDoctorProfile);
+
 router.route("/save-profile-photo").post(upload.single('profilepic'),verifyJWT,saveProfilePhoto);
 router.route("/sent-otp").post(SentOTP);
 router.route("/verifyJWT").get(verifyJWT,SendUserId);
