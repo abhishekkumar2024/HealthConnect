@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
 
-const DATABASECONNECTION = async () => {
+const MONGODBCONNECTION = async () => {
     try {
-        const connectionDB = await mongoose.connect(`${process.env.MONGODB_URI}/${process.env.DB_NAME}`, {
-            useNewUrlParser: true,
+        console.log(`MONGODB_URI: ${process.env.PORT}`) // Debugging
+        const connection = await mongoose.connect(process.env.MONGODB_URI, {
             useUnifiedTopology: true,
+            useNewUrlParser: true,
         });
-        console.log(`\nConnection established at HOST: ${connectionDB.connection.host}`);
+        console.log(`✅ MongoDB Connected at ${connection.connection.host}:${connection.connection.port}`);
     } catch (error) {
-        throw new Error(`Database connection failed: ${error.message}`);
+        console.error(`❌ MongoDB connection failed. Error:`, error);
     }
 };
 
-export { DATABASECONNECTION };
+// MONGODBCONNECTION();
+
+export { MONGODBCONNECTION };

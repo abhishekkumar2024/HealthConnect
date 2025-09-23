@@ -14,7 +14,7 @@ const NavBar = () => {
         <div className="flex items-center justify-between">
           {/* Logo and Title */}
           <div className="flex items-center gap-8 flex-1">
-            <h1 className={`text-2xl font-bold ${themeStyles.text}`}>HealthConnect</h1>
+            <h1 className={`text-2xl font-bold ${themeStyles.text}`}><a href="/">HealthConnect</a></h1>
 
             {/* Search Bar */}
             <div className="relative flex-1 max-w-2xl">
@@ -23,7 +23,10 @@ const NavBar = () => {
                 placeholder="Search for doctors, specialties..."
                 className={`w-full pl-10 pr-4 py-2 rounded-lg ${themeStyles.inputBg} ${themeStyles.text} focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) =>{
+                  setSearchQuery(e.target.value)
+                }
+                }
               />
               <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${themeStyles.iconColor}`} />
             </div>

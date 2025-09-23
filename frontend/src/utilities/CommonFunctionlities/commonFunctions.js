@@ -4,7 +4,7 @@ import { placeholders } from "../Variables.js";
 
 const getPlaceholder = (field) => {
     return placeholders[field] || `Enter ${field}`;
-  };
+  };  
 
 const EditableField = ({
   label,
@@ -145,7 +145,7 @@ const EditableFieldDoctor = ({
       </div>
     );
   }
-
+  // console.log(field, value)
   const isSelect = ["specialization", "role"].includes(label.toLowerCase());
   const isNumber = ["experience", "consultationfee", "pincode"].includes(label.toLowerCase());
   const isReadOnly = ["email", "role"].includes(label.toLowerCase());

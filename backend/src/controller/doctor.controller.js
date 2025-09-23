@@ -12,7 +12,7 @@ const DoctorProfile = async (req, res) => {
         }
 
         const DoctorDetails = await Doctor.findById(user._id).select("-refreshToken -accessToken -password");
-
+        // console.log(DoctorDetails)
         return res.status(200)
             .json(
                 new ApiResponse(
@@ -31,11 +31,15 @@ const DoctorProfile = async (req, res) => {
 const SaveDoctorProfile = async (req, res) => {
     try {
         const details = req.body
-        console.log(req.body)
+        // console.log(req.body)
+        // console.log(details.consultationfee)
+        // console.log(typeof(details.consultationfee))
+        // console.log(typeof(parseInt(details.consultationfee)))
         const response = await Doctor.findByIdAndUpdate(
             req.user._id,
             {
-                ...details
+                ...details,
+                consultationFee: parseInt(details.consultationfee)
             },
             {
                 new: true
@@ -89,4 +93,34 @@ const saveProfilePhoto = async (req, res) => {
         )
     }
 }
-export { DoctorProfile, SaveDoctorProfile, saveProfilePhoto }
+
+const FetchDoctorBasedOnId = async (req,res) => {
+    try {
+        const id = req.params.id
+        if(!id){
+            throw new ApiErrors(404,"server error")
+        }
+        const response = await Doctor.findById(id)
+
+        const formattedResponse = {
+            name: response.name,
+            specialization: response.specialization,
+            experience: response.experience,
+            consultationFee: response.consultationFee,
+            profilepic: response.profilepic
+        }
+        console.log(formattedResponse)
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                formattedResponse,
+                "file uploaded successfully"
+            )
+        )
+    } catch (error) {
+        
+    }
+}
+
+
+export { DoctorProfile, SaveDoctorProfile, saveProfilePhoto, FetchDoctorBasedOnId }

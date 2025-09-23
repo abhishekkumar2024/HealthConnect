@@ -1,4 +1,4 @@
-import { DATABASECONNECTION } from './db/db.js'
+import { MONGODBCONNECTION } from './db/db.js'
 import { app } from './app.js'
 import dotenv from 'dotenv'
 
@@ -8,7 +8,7 @@ dotenv.config(
     }
 )
 
-DATABASECONNECTION().then(()=>{
+MONGODBCONNECTION().then(()=>{
     app.listen(process.env.PORT || 8000, ()=>{
         console.log(`Mongodb is connected at port : ${process.env.PORT}`)
     })

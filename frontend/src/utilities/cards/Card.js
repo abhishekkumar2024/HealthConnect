@@ -1,5 +1,6 @@
 import { useDarkMode } from "../../contextAPI/contextApi";
 import * as React from "react"
+import { useState } from "react";
 import { cva } from "class-variance-authority"
 import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react"
 
@@ -170,5 +171,90 @@ const Badge = ({ children, variant = "default", className, ...props }) => {
     </span>
   );
 };
+
+
+export const Tabs = ({ children, defaultValue }) => {
+  const [activeTab, setActiveTab] = useState(defaultValue);
+
+  return (
+    <div>
+      {React.Children.map(children, child => 
+        React.cloneElement(child, { activeTab, setActiveTab })
+      )}
+    </div>
+  );
+};
+
+export const TabsList = ({ children, activeTab, setActiveTab }) => (
+  <div className="flex space-x-2 mb-4">
+    {React.Children.map(children, child => 
+      React.cloneElement(child, { activeTab, setActiveTab })
+    )}
+  </div>
+);
+
+export const TabsTrigger = ({ value, children, activeTab, setActiveTab }) => (
+  <button
+    className={`px-4 py-2 ${activeTab === value ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+    onClick={() => setActiveTab(value)}
+  >
+    {children}
+  </button>
+);
+
+export const TabsContent = ({ value, children, activeTab }) => (
+  activeTab === value ? <div>{children}</div> : null
+);
+
+export const Select = React.forwardRef(({ onValueChange, value, children, placeholder }, ref) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleSelect = React.useCallback(
+    (nextValue) => {
+      onValueChange(nextValue);
+      setIsOpen(false);
+    },
+    [onValueChange]
+  );
+
+  return (
+    <div ref={ref} className="relative w-full">
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full p-2 border rounded flex justify-between items-center"
+      >
+        <span>{value || placeholder}</span>
+      </button>
+      {isOpen && (
+        <div className="absolute z-10 w-full border rounded mt-1 bg-white shadow-lg">
+          {React.Children.map(children, (child) =>
+            React.cloneElement(child, {
+              onClick: () => handleSelect(child.props.value),
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
+export const SelectTrigger = ({ children }) => (
+  <div>{children}</div>
+);
+
+export const SelectValue = ({ children }) => (
+  <span>{children}</span>
+);
+
+export const SelectContent = ({ children }) => (
+  <div>{children}</div>
+); 
+
+export const SelectItem = ({ value, children, onClick: handleClick }) => (
+  <div className="cursor-pointer py-1 px-2 hover:bg-gray-200" onClick={() => handleClick(value)}>
+    {children}
+  </div>
+);
 
 export { FirstTitleCard, Card, StatCard, CardHeader, CardTitle, CardContent, Alert, AlertTitle, AlertDescription, Button, Badge };

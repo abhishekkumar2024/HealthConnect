@@ -55,25 +55,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 Middleware
-app.use((req, res) => {
-    res.status(404).json({
-        error: "Not Found",
-        message: "The requested resource could not be found.",
-    });
-});
-
-// Unhandled Rejection Handling
-process.on("unhandledRejection", (reason, promise) => {
-    console.error("Unhandled Rejection:", reason);
-    // Optionally log and exit for critical issues
-});
-
-// Uncaught Exception Handling
-process.on("uncaughtException", (error) => {
-    console.error("Uncaught Exception:", error);
-    // Gracefully shut down or restart the server
-});
 
 // Graceful Shutdown
 process.on("SIGTERM", () => {

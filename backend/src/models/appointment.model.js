@@ -13,6 +13,10 @@ const AppointmentSchema = new mongoose.Schema({
     },
     dateTime: {
         type: Date,
+        required: false,
+    },
+    slot: {
+        type: String,
         required: true,
     },
     status: {
@@ -25,28 +29,16 @@ const AppointmentSchema = new mongoose.Schema({
         enum: ['initial', 'follow-up', 'consultation'],
         required: true,
     },
-    symptoms: [String],
-    diagnosis: {
-        type: String,
-        default: '',
-    },
-    prescription: [{
-        medicine: String,
-        dosage: String,
-        duration: String,
-        notes: String,
-    }],
-    notes: String,
     fee: {
         amount: Number,
         status: {
             type: String,
-            enum: ['pending', 'paid', 'refunded'],
-            default: 'pending',
+            enum: ['paid', 'refunded'],
+            default: 'paid',
         },
     }
 }, {
     timestamps: true,
 });
 
-export const Appointment = mongoose.model('Appointment', AppointmentSchema);
+export const Appointment = mongoose.models.Appointment || mongoose.model('Appointment', AppointmentSchema);
