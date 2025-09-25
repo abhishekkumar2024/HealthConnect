@@ -1,24 +1,50 @@
 import { Router } from "express";
-import { LoginUser, RegisterUser, LogoutUser, SentOTP } from "../controller/user.controller.js";
+import { 
+  LoginUser, 
+  RegisterUser, 
+  LogoutUser, 
+  SentOTP, 
+  SendUserId ,
+  GetProfile,
+  UpdateProfile
+} from "../controller/user.controller.js";
 import { verifyJWT } from "../middleware/auth.middlleware.js";
-import { PatientProfile, SavePatientData } from "../controller/patient.controller.js";
-import { DoctorProfile, SaveDoctorProfile } from "../controller/doctor.controller.js";
-import { SendUserId } from "../controller/user.controller.js";
-import { saveProfilePhoto } from "../controller/doctor.controller.js";
+import { 
+  PatientProfile, 
+  SavePatientData 
+} from "../controller/patient.controller.js";
+
+import {searchUsers} from "../controller/search.controller.js"
+
 import { upload } from "../middleware/multer.middleware.js";
 
-const router = Router()
+const router = Router();
 
-router.route("/register").post(RegisterUser);
-router.route("/login").post(LoginUser);
-router.route("/patient-dashboard/:id").get(verifyJWT,LoginUser);
-router.route("/logout").get(verifyJWT,LogoutUser);
-router.route("/Patientprofile").get(verifyJWT,PatientProfile);
-router.route("/Doctorprofile").get(verifyJWT,DoctorProfile);
-router.route("/save-profile").post(verifyJWT,SavePatientData);
-router.route("/save-doctor-profile").post(verifyJWT,SaveDoctorProfile);
-router.route("/save-profile-photo").post(upload.single('profilepic'),verifyJWT,saveProfilePhoto);
-router.route("/sent-otp").post(SentOTP);
-router.route("/verifyJWT").get(verifyJWT,SendUserId);
+//////////////////////////
+// User Authentication Routes
+//////////////////////////
+router.post("/register", RegisterUser);            // Register a new user
+router.post("/login", LoginUser);                  // Login
+router.get("/logout", verifyJWT, LogoutUser);      // Logout
+router.post("/sent-otp", SentOTP);                 // Send OTP
+router.get("/verifyJWT", verifyJWT, SendUserId);   // Verify JWT and get user info
 
-export default router
+//////////////////////////
+// Patient Routes
+//////////////////////////
+router.get("/patient-dashboard/:id", verifyJWT, LoginUser); // Patient dashboard
+router.get("/Patientprofile", verifyJWT, PatientProfile);   // Get patient profile
+router.post("/save-profile", verifyJWT, SavePatientData);   // Save/update patient profile
+
+//////////////////////////
+// Doctor Routes
+//////////////////////////
+router.get("/profile/:id", verifyJWT, GetProfile); 
+router.post("/profile/:id", verifyJWT, upload.single('profilepic'), UpdateProfile);
+// Get doctor profile
+//////////////////////////
+// Search Implementation
+//////////////////////////
+
+router.get("/search", verifyJWT, searchUsers)
+export default router;

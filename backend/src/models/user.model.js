@@ -27,6 +27,15 @@ const UserSchema = new mongoose.Schema(
             enum: ["Patient", "Doctor", "Admin"],
             default: "Patient",
         },
+        address: {
+            street: String,
+            city: String,
+            state: String,
+            country: String,
+            pincode: Number,
+            landMark: String,
+            default: {},
+        },
         refreshToken: {
             type: String,
             default: "",
@@ -36,9 +45,11 @@ const UserSchema = new mongoose.Schema(
             default: "",
         },
         name: {
-            type: String,
-            trim: true,
-            default: "user"
+            title: { type: String, default: "Dr." },
+            firstName: { type: String },
+            middleName: { type: String },
+            lastName: { type: String },
+            default: {},
         },
         dateofbirth: {
             type: Date,
@@ -63,13 +74,9 @@ const UserSchema = new mongoose.Schema(
         isDeleted: {
             type: Boolean,
             default: false,
-        },
-        otp: {
-            type: String,
-            default: "",
-        },
+        }
     },
-    { 
+    {
         timestamps: true,
         discriminatorKey: 'userType' // This allows us to create different user types
     }
@@ -126,6 +133,16 @@ UserSchema.methods.generateToken = function (type) {
     // console.log(Token)
     return Token;
 };
+
+// Add indexes here
+UserSchema.index({ name: 1 });
+UserSchema.index({ role: 1 });
+UserSchema.index({ isVerified: 1 });
+UserSchema.index({ role: 1, isVerified: 1 });
+UserSchema.index(
+    { name: "text", address: "text"},
+    { weights: { name: 5, address: 2 } } // prioritize name
+);
 
 const User = mongoose.model("User", UserSchema);
 export default User;

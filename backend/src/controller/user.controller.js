@@ -5,6 +5,7 @@ import { refreshTokenAndAccessToken } from '../utilities/refreshTokenAndAccessTo
 import twilio from 'twilio';
 import { ApiErrors } from '../utilities/ApiError.js';
 import { ApiResponse } from '../utilities/ApiResponse.js';
+import { cloudinaryFileUplodad } from '../utilities/cloudinary.js';
 
 const twilioClient = twilio(
     process.env.your_twilio_account_sid,
@@ -13,9 +14,9 @@ const twilioClient = twilio(
 const TWILIO_PHONE_NUMBER = process.env.your_twilio_phone_number;
 
 const RegisterUser = async (req, res) => {
+    
     try {
         const { role, password, email } = req.body;
-        console.log(role, password, email)
 
         if (!req.body || !role || !password || !email) {
             throw new ApiErrors(400, "Please provide all required credentials!");
@@ -212,10 +213,44 @@ const SendUserId = async (req, res) => {
     }
 };
 
+const GetProfile = async(req, res) => {
+    const {id} = req.params;
+    const user = await User.findById(id);
+    const role = user.role;
+    let profile;
+    if(role === "Doctor"){
+        profile = await Doctor.findById(id).populate('reviews');
+    } else if(role === "Patient"){
+        profile = await Patient.findById(id).select('-medicalHistory -password -refreshToken -accessToken -isDeleted -isBlocked -isVerified -otp');
+    }
+    return res.status(200).json(new ApiResponse(200, {profile}, "Profile fetched successfully"));
+}
+
+const UpdateProfile = async(req, res) => {
+    const {id} = req.params;
+    const updates = req.body;
+    if(req.file){
+        const cloudinaryUrl = await cloudinaryFileUplodad(req.file.path);     
+        updates.profilepic = cloudinaryUrl.url;
+    }
+
+    const user = await User.findById(id);
+    const role = user.role;
+    let updatedProfile;
+    if(role === "Doctor"){
+        updatedProfile = await Doctor.findByIdAndUpdate(id, updates, {new: true, runValidators: true});
+    } else if(role === "Patient"){
+        updatedProfile = await Patient.findByIdAndUpdate(id, updates, {new: true, runValidators: true}).select('-medicalHistory -password -refreshToken -accessToken -isDeleted -isBlocked -isVerified -otp');
+    }
+    return res.status(200).json(new ApiResponse(200, {updatedProfile}, "Profile updated successfully"));
+};
+
 export {
     RegisterUser,
     LoginUser,
     LogoutUser,
     SentOTP,
-    SendUserId
+    SendUserId,
+    GetProfile,
+    UpdateProfile
 };
