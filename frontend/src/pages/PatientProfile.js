@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { User, Calendar, Activity, FileText, Clock, Shield, Pill, AlertTriangle, Edit2, Save, X, Heart, Thermometer, Loader2, MapPin, Flag, Hash, Camera, CheckCircle, XCircle, } from "lucide-react";
 import { useDarkMode } from "../contextAPI/contextApi.js";
-import { Card, StatCard, CardHeader, CardTitle, CardContent, Alert, AlertDescription, } from "../utilities/cards/Card.js";
+import { Card, StatCard, CardHeader, CardTitle, CardContent, Alert, AlertDescription, } from "../utils/cards/Card.js";
 import { PatientProfile, SaveDataAPI } from "../api/auth.api.js";
-import { EditableField, calculateBMI} from "../utilities/CommonFunctionlities/commonFunctions.js";
-import { validateFields } from "../utilities/Validation.js";
+import { EditableField, calculateBMI} from "../utils/CommonFunctionlities/commonFunctions.js";
+import { validateFields } from "../utils/Validation.js";
 import { useParams } from "react-router-dom";
 
 const PatientProfileDetails = () => {

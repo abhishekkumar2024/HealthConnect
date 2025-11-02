@@ -21,11 +21,11 @@ import {
     CardContent,
     Alert,
     AlertDescription,
-} from "../utilities/cards/Card.js";
+} from "../utils/cards/Card.js";
 import { useDarkMode } from "../contextAPI/contextApi.js";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EditableFieldDoctor } from "../utilities/CommonFunctionlities/commonFunctions.js";
-import { validateFields } from "../utilities/Validation.js";
+import { EditableFieldDoctor } from "../utils/CommonFunctionlities/commonFunctions.js";
+import { validateFields } from "../utils/Validation.js";
 import { DoctorProfile } from "../api/doctor.api.js";
 import { SaveDoctorProfile,SaveProfilePhotoAPI } from "../api/auth.api.js";
 

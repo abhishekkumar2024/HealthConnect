@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDarkMode } from '../contextAPI/contextApi';
-import { Card, CardHeader, CardTitle, CardContent } from "../utilities/cards/Card";
+import { Card, CardHeader, CardTitle, CardContent } from "../utils/cards/Card";
 import { Bell, Shield, Mail, ChevronRight, Moon, Sun, User } from 'lucide-react'
 
 const SettingsPage = () => {

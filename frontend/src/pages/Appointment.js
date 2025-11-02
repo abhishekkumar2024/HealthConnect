@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardContent } from "../utilities/cards/Card";
+import { Card, CardHeader, CardTitle, CardContent } from "../utils/cards/Card";
 import { Calendar, Clock, Plus, User, MessageSquare, Phone } from "lucide-react";
 import { useDarkMode } from "../contextAPI/contextApi";
 
