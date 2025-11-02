@@ -1,5 +1,5 @@
 import User from "../models/user.model.js"
-import { ApiResponse } from "../utilities/ApiResponse.js";
+import { ApiResponse } from "../utils/ApiResponse.utils.js";
 // ust path to your User model
 
 /**
@@ -65,30 +65,5 @@ export const searchUsers = async (req, res) => {
     }
 };
 
-export const searchSuggestions = async (req, res) => {
-    const { query, limit } = req.query
-    if (!query || query.trim() === "") {
-        return [];
-    }
-    const users = await User.find(
-        {
-            $or: [
-                { name: { $regex: query, $options: "i" } },
-                { email: { $regex: query, $options: "i" } },
-                { phone: { $regex: query, $options: "i" } }
-            ]
-        },
-        { name: 1, email: 1, phone: 1, role: 1 }
-    ).limit(limit);
-    return res
-        .status(200)
-        .json(
-            new ApiResponse(
-                200,
-                {},
-                `Fetched Document with suggestions successfully.`
-            )
-        )
-};
 
 // export {searchUsers}

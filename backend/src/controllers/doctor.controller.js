@@ -1,12 +1,12 @@
 import { Doctor } from "../models/doctor.model.js";
 import { Patient } from "../models/patient.model.js";
-import { ApiErrors } from "../utilities/ApiError.js";
-import { ApiResponse } from "../utilities/ApiResponse.js";
-import { cloudinaryFileUplodad } from "../utilities/cloudinary.js";
+import ApiErrors  from "../utils/ApiError.utils.js";
+import { ApiResponse } from "../utils/ApiResponse.utils.js";
+import { cloudinaryFileUplodad } from "../utils/cloudinary.js";
 const DoctorProfile = async (req, res) => {
     try {
         const user = req.user;
-
+        
         if (!user) {
             return res.status(400).json({ message: "please login !" });
         }
@@ -64,7 +64,7 @@ const saveProfilePhoto = async (req, res) => {
         
         const profilePath = await cloudinaryFileUplodad(path)
         
-        const userModel = req.user.role === 'Doctor' ? Doctor : Patient;
+        const userModel = req.user.role === 'doctor' ? Doctor : Patient;
         
         const response = await userModel.findByIdAndUpdate(
             req.user._id, // User ID from authenticated request
