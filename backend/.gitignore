@@ -1,8 +1,52 @@
-<<<<<<< HEAD
+# .gitignore
+# Dependencies
 node_modules/
-/node_modules
+package-lock.json
+yarn.lock
+
+# Environment variables
 .env
-/.env
-=======
-*node_modules/*
->>>>>>> 047130e7b2e08d576bc5f47608605ef156fbe930
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# Build output
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+test-results/
+__tests__/
+
+# Temporary files
+tmp/
+temp/

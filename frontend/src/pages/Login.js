@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail, Lock } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
-import { validateFields } from "../utilities/Validation";
+import { validateFields } from "../utils/Validation";
 import { loginAPI } from "../api/auth.api.js";
 import { useDarkMode } from "../contextAPI/contextApi";
 

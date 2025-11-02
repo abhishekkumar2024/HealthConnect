@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { FirstDivClass, CardDivClass } from "../utilities/className";
-import { Button } from "../utilities/Button";
-import { validateFields } from "../utilities/Validation";
+import { FirstDivClass, CardDivClass } from "../utils/className";
+import { Button } from "../utils/Button";
+import { validateFields } from "../utils/Validation";
 import { SentOTPAPI } from "../api/auth.api";
 
 const ResetPassword = () => {

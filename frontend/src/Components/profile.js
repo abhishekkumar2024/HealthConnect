@@ -41,10 +41,10 @@ const UserProfileMenu = () => {
     e.preventDefault();
     const Response = await IsverifyJWTAPI();
     // console.log(Response.data.data.user.role)
-    if (Response.data.data.user.role === 'Patient') {
+    if (Response.data.data.user.role === 'patient') {
       navigate(`/patient-profile/${Response.data.data.user._id}`);
     }
-    else if (Response.data.data.user.role === 'Doctor') {
+    else if (Response.data.data.user.role === 'doctor') {
       // console.log(Response.data._id)
       navigate(`/doctor-profile/${Response.data.data.user._id}`);
     }

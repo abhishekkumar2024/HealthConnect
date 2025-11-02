@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, User, Trash2, Check, ChevronRight, X, Phone, Video, MessageSquare, FileText, Clock4 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "../utilities/cards/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "../utils/cards/Card";
 import { useDarkMode } from '../contextAPI/contextApi';
 import { NavBar } from '../Components/NavBar';
 import { DoctorProfile } from "../api/doctor.api.js";
