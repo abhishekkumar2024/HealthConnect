@@ -1,8 +1,6 @@
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import ApiErrors from "../utils/ApiError.utils.js";
-import Patient from "../models/patient.model.js";
-import Doctor from "../models/doctor.model.js";
 
 export const authenticateUser = async (req, res, next) => {
   try {
@@ -15,10 +13,9 @@ export const authenticateUser = async (req, res, next) => {
     // Decode and verify token
     const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     //Select correct model based on role
-    const UserModel = decodedToken.role === 'doctor' ? Doctor : Patient;
 
     //Remove extra '?' - findById already returns null if not found
-    const user = await UserModel.findOne({ userId: decodedToken._id }).select("-password -refreshToken");
+    const user = await User.findById(decodedToken._id).select("-password -refreshToken");
     if (!user) {
       return next(new ApiErrors(401, "Invalid Access Token"));
     }

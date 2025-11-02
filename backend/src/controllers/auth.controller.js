@@ -194,10 +194,11 @@ export const ForgotPassword = catchAsync(async (req, res) => {
     // Create reset URL (frontend URL)
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     const text = `You requested a password reset. Click the link below to reset your password:\n\n${resetUrl}\n\nThis link will expire in 15 minutes.\n\nIf you didn't request this, please ignore this email.`;
-    
+    console.log('Reset URL:', resetUrl);
+    console.log(user.email, user.name)
     try {
         // Send email with reset link
-        await NotificationService.sendEmail(user.email, user.name, text);
+        await NotificationService.sendEmail({to: user.email, subject: "Password Reset", text});
 
         res.status(200).json({
             success: true,
@@ -219,7 +220,8 @@ export const ForgotPassword = catchAsync(async (req, res) => {
  * @access  Public
  */
 export const ResetPassword = catchAsync(async (req, res) => {
-    const { token, newPassword } = req.body;
+    const { newPassword } = req.body;
+    const { token } = req.query;
 
     // Hash the incoming token to compare with database
     const resetTokenHash = crypto
@@ -484,161 +486,6 @@ export const VerifyOTP = catchAsync(async (req, res) => {
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: 'OTP verified successfully',
-  });
-});
-
-/**
- * Get current user info (from JWT)
- * @route GET /api/v1/auth/verify
- */
-export const SendUserId = catchAsync(async (req, res) => {
-  const user = req.user;
-
-  res.status(HTTP_STATUS.OK).json({
-    success: true,
-    data: {
-      userId: user._id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      phoneNumber: user.phoneNumber,
-      profilePicture: user.profilePicture,
-      isVerified: user.isVerified,
-    },
-  });
-});
-
-/**
- * Get user profile by ID
- * @route GET /api/v1/profile/:id
- */
-export const GetProfile = catchAsync(async (req, res) => {
-  const { id } = req.params;
-
-  // Find user first to get role
-  const user = await User.findById(id).select('role name email phoneNumber profilePicture');
-
-  if (!user) {
-    throw new ApiErrors (
-      'User not found',
-      HTTP_STATUS.NOT_FOUND,
-      ERROR_CODES.NOT_FOUND
-    );
-  }
-
-  let profile;
-
-  if (user.role === 'doctor') {
-    profile = await Doctor.findOne({ userId: id })
-      .populate('userId', 'name email phoneNumber profilePicture')
-      .populate('reviews');
-  } else if (user.role === 'patient') {
-    // Don't show sensitive medical history to others
-    const isOwnProfile = req.user._id.toString() === id;
-    
-    profile = await Patient.findOne({ userId: id })
-      .populate('userId', 'name email phoneNumber profilePicture')
-      .select(isOwnProfile ? '' : '-medicalHistory -allergies -chronicConditions');
-  }
-
-  logger.info('Profile fetched', { userId: id });
-
-  res.status(HTTP_STATUS.OK).json({
-    success: true,
-    data: {
-      role: user.role,
-      profile: profile || { userId: user },
-    },
-  });
-});
-
-/**
- * Update user profile
- * @route PUT /api/v1/profile/:id
- */
-export const UpdateProfile = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const updates = req.body;
-  const currentUserId = req.user._id.toString();
-
-  // Check if user is updating their own profile
-  if (id !== currentUserId && req.user.role !== 'admin') {
-    throw new ApiErrors (
-      'You can only update your own profile',
-      HTTP_STATUS.FORBIDDEN,
-      ERROR_CODES.AUTHORIZATION_ERROR
-    );
-  }
-
-  // Handle profile picture upload
-  if (req.file) {
-    try {
-      const cloudinaryResult = await uploadToCloudinary(req.file.path, {
-        folder: 'healthcare/profiles',
-        public_id: `profile_${id}`,
-        transformation: [
-          { width: 500, height: 500, crop: 'fill', gravity: 'face' },
-          { quality: 'auto' },
-        ],
-      });
-
-      // Update user's profile picture in User model
-      await User.findByIdAndUpdate(id, {
-        profilePicture: cloudinaryResult.secure_url,
-      });
-
-      updates.profilepic = cloudinaryResult.secure_url;
-    } catch (error) {
-      logger.error('Cloudinary upload error', { error: error.message });
-      throw new ApiErrors (
-        'Failed to upload profile picture',
-        HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        ERROR_CODES.EXTERNAL_SERVICE_ERROR
-      );
-    }
-  }
-
-  // Remove fields that shouldn't be updated
-  delete updates._id;
-  delete updates.userId;
-  delete updates.password;
-  delete updates.refreshToken;
-  delete updates.role;
-
-  const user = await User.findById(id);
-
-  if (!user) {
-    throw new ApiErrors (
-      'User not found',
-      HTTP_STATUS.NOT_FOUND,
-      ERROR_CODES.NOT_FOUND
-    );
-  }
-
-  let updatedProfile;
-
-  if (user.role === 'doctor') {
-    updatedProfile = await Doctor.findOneAndUpdate(
-      { userId: id },
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).populate('userId', 'name email phoneNumber profilePicture');
-  } else if (user.role === 'patient') {
-    updatedProfile = await Patient.findOneAndUpdate(
-      { userId: id },
-      { $set: updates },
-      { new: true, runValidators: true }
-    )
-      .populate('userId', 'name email phoneNumber profilePicture')
-      .select('-password -refreshToken');
-  }
-
-  logger.info('Profile updated', { userId: id });
-
-  res.status(HTTP_STATUS.OK).json({
-    success: true,
-    message: 'Profile updated successfully',
-    data: updatedProfile,
   });
 });
 

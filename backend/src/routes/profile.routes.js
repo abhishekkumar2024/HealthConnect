@@ -3,7 +3,7 @@ import { Router } from 'express';
 import {
   GetProfile,
   UpdateProfile,
-} from '../controllers/auth.controller.js';
+} from '../controllers/profile.controller.js';
 import {
   PatientProfile,
   SavePatientData,
@@ -14,38 +14,17 @@ import { upload } from '../middleware/multer.middleware.js';
 const router = Router();
 
 /**
- * @route   GET /api/v1/profile
+ * @route   GET /api/v1/profile/:id
  * @desc    Get logged-in user's profile
  * @access  Private
  */
-router.get('/', authenticateUser, PatientProfile);
+router.get('/:username', authenticateUser, GetProfile);
 
 /**
  * @route   PUT /api/v1/profile
- * @desc    Update logged-in user's profile data
+ * @desc    Update logged-in user's profile (handles text fields AND file upload)
  * @access  Private
  */
-router.put('/', authenticateUser, SavePatientData);
-
-/**
- * @route   POST /api/v1/profile/picture
- * @desc    Upload/update profile picture
- * @access  Private
- */
-router.post('/picture', upload.single('profilepic'), authenticateUser, UpdateProfile);
-
-/**
- * @route   GET /api/v1/profile/:id
- * @desc    Get any user's profile by ID (public info)
- * @access  Private
- */
-router.get('/:id', authenticateUser, GetProfile);
-
-/**
- * @route   PUT /api/v1/profile/:id
- * @desc    Update profile by ID (own profile only)
- * @access  Private
- */
-router.put('/:id', upload.single('profilepic'), authenticateUser, UpdateProfile);
+router.put('/:username', authenticateUser, upload.single('profilePicture'), UpdateProfile);
 
 export default router;

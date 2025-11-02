@@ -7,6 +7,11 @@ const SALT_ROUND = 10;
 
 const UserSchema = new mongoose.Schema(
     {
+        username: {
+            type: String,
+            default: "User",
+            trim: true,
+        },
         email: {
             type: String,
             required: [true, "Email is required"],
@@ -175,7 +180,6 @@ UserSchema.methods.isPasswordCorrect = async function (password) {
 
 // ✅ Generate access token - FIXED payload to use _id
 UserSchema.methods.generateAccessToken = function () {
-    console.log('Generating access token for user ID:', this._id);
     return jwt.sign(
         {
             _id: this._id,      // ✅ Changed from 'id' to '_id'
@@ -201,6 +205,12 @@ UserSchema.methods.generateRefreshToken = function () {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRE || "7d",
         }
     );
+};
+
+UserSchema.methods.generateTokens = function () {
+    const accessToken = this.generateAccessToken();
+    const refreshToken = this.generateRefreshToken();
+    return { accessToken, refreshToken };
 };
 
 // ✅ Indexes

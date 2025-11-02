@@ -1,4 +1,10 @@
-import {cloudinaryConfig as cloudinary} from "../config/cloudinary.config.js"
+import {v2 as cloudinary} from "cloudinary"
+
+cloudinary.config({ 
+    cloud_name: process.env.cloud_name, 
+    api_key: process.env.api_key, 
+    api_secret: process.env.api_secret 
+});
 import fs from "fs"
 import ApiErrors from "../utils/ApiError.utils.js";
 
@@ -6,10 +12,8 @@ import ApiErrors from "../utils/ApiError.utils.js";
 
 export const uploadToCloudinary= async (cloudinary_Path)=>{
     try {
-         if (!cloudinary_Path) return null
-        //console.log(cloudinary_Path,typeof cloudinary_Path)
-        console.log(cloudinary_Path)
-        console.log(typeof cloudinary_Path)
+        if (!cloudinary_Path) return null
+        console.log(cloudinary)
         const response=await cloudinary.uploader.upload(cloudinary_Path,{
             resource_type:"auto"
         })

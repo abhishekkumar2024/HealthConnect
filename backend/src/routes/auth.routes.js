@@ -5,7 +5,6 @@ import {
   LoginUser,
   LogoutUser,
   SentOTP,
-  SendUserId,
   RefreshToken,
   ForgotPassword,
   ResetPassword,
@@ -58,10 +57,16 @@ router.post('/reset-password', authLimiter, validate(resetPasswordSchema), Reset
  * @desc    Change user password
  * @access  Private
  */
-router.post('/change-password', authLimiter, validate(changePasswordSchema), ChangePassword);
-
 // Protected routes
 router.use(authenticateUser);
+
+/**
+ *  @route   POST /api/v1/auth/change-password
+ *  @desc    Change user password
+ *  @access  Private
+ */ 
+router.post('/change-password', authLimiter, validate(changePasswordSchema), ChangePassword);
+
 /**
  * @route   POST /api/v1/auth/send-otp
  * @desc    Send OTP for verification
@@ -83,11 +88,5 @@ router.post('/refresh-token', RefreshToken);
  */
 router.post('/logout', LogoutUser);
 
-/**
- * @route   GET /api/v1/auth/verify
- * @desc    Verify JWT and get user info
- * @access  Private
- */
-router.get('/verify', SendUserId);
 
 export default router;

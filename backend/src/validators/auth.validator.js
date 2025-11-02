@@ -226,14 +226,6 @@ export const changePasswordSchema = Joi.object({
       'any.invalid': 'New password must be different from current password',
       'any.required': 'New password is required',
     }),
-
-  confirmPassword: Joi.string()
-    .valid(Joi.ref('newPassword'))
-    .required()
-    .messages({
-      'any.only': 'Passwords do not match',
-      'any.required': 'Please confirm your password',
-    }),
 }).options({ 
   stripUnknown: true,
   abortEarly: false,
@@ -298,13 +290,6 @@ export const forgotPasswordSchema = Joi.object({
 
 
 export const resetPasswordSchema = Joi.object({
-  token: Joi.string()
-    .required()
-    .messages({
-      'string.empty': 'Reset token is required',
-      'any.required': 'Reset token is required',
-    }),
-
   newPassword: Joi.string()
     .min(8)
     .max(128)

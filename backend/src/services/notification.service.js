@@ -12,10 +12,12 @@ class NotificationService {
       logger.warn('Email transporter not configured, skipping email');
       return { success: false, error: 'Email not configured' };
     }
-
+    console.log('Preparing to send email to:', to);
+    console.log('Email subject:', subject);
+    console.log('Email text:', text);
     try {
       const mailOptions = {
-        from: `"Healthcare App" <${process.env.GMAIL_USER}>`,
+        from: `"HealthConnect App" <${process.env.HEALTHCONNECT_GMAIL}>`,
         to,
         subject,
         text,
@@ -120,7 +122,7 @@ class NotificationService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Healthcare Appointment System</h1>
+              <h1>HealthConnect Appointment System</h1>
             </div>
             <div class="content">
               <p style="white-space: pre-line;">${text}</p>
