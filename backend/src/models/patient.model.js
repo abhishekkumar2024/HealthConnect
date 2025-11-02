@@ -1,9 +1,9 @@
-
 import mongoose from 'mongoose';
 import User from './user.model.js';
 
+
 const PatientSchema = new mongoose.Schema({
-    id:{
+    id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
@@ -14,12 +14,12 @@ const PatientSchema = new mongoose.Schema({
     weight: {
         type: Number,
         min: 0,
-        default: 0
+        default: 0,
     },
     height: {
         type: Number,
         min: 0,
-        default: 0
+        default: 0,
     },
     bmi: {
         type: Number,
@@ -29,13 +29,6 @@ const PatientSchema = new mongoose.Schema({
         type: String,
         // unique: true,
         default: "",
-    },
-    address: {
-        street: String,
-        city: String,
-        state: String,
-        country: String,
-        pincode: Number,
     },
     emergencyContact: {
         name: String,
@@ -70,7 +63,7 @@ const PatientSchema = new mongoose.Schema({
     }
 });
 
-const Patient = User.discriminator('Patient', PatientSchema);
+// Check if the 'Patient' discriminator already exists
+const Patient = mongoose.models.Patient || User.discriminator('Patient', PatientSchema);
 
 export { Patient };
-

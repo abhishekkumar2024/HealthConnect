@@ -7,7 +7,7 @@ import { useDarkMode } from '../contextAPI/contextApi.js';
 const UserProfileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { themeStyles } = useDarkMode()
+  const { isDarkMode, themeStyles } = useDarkMode();
   const navigate = useNavigate();
 
   // Close dropdown when clicking outside
@@ -54,11 +54,14 @@ const UserProfileMenu = () => {
     e.preventDefault();
     try {
       const response = await IsverifyJWTAPI();
-      // console.log(response)
+      console.log(response)
 
       if (response.status === 200) {
         // alert("Appointments");
-        navigate(`/appointments/${response.data._id}`);
+        if(response.data.data.user.role === 'Patient'){
+          navigate(`/appointment-for-patient/${response.data.data.user._id}`);
+        }
+        else navigate(`/appointment-for-doctor/${response.data._id}`);
       } else {
         alert(response.data.message);
       }
@@ -66,6 +69,7 @@ const UserProfileMenu = () => {
       alert(error.response?.data?.message || "Profile failed");
     }
   }
+  
   const settingHandler = async (e) => {
     e.preventDefault();
     try {
@@ -82,9 +86,8 @@ const UserProfileMenu = () => {
     } catch (error) {
       alert(error.response?.data?.message || "Profile failed");
     }
-
-
   }
+  
   const helpHandler = async (e) => {
     e.preventDefault();
     try {
@@ -94,55 +97,64 @@ const UserProfileMenu = () => {
       alert(error.response?.data?.message || "Profile failed");
     }
   }
+  
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded-full ${themeStyles.buttonHoverBg} text-gray-700`}
+        className={`p-2 rounded-full ${themeStyles.iconColor} hover:bg-opacity-10 ${isDarkMode ? 'hover:bg-purple-400' : 'hover:bg-teal-500'} transition-all duration-200 hover:scale-105`}
       >
         <User className="h-5 w-5" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+        <div 
+          className={`absolute right-0 mt-2 w-48 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-md ${themeStyles.shadowEffect} py-1 z-50 border ${themeStyles.borderColor} overflow-hidden transform transition-all duration-200 ease-in-out origin-top-right`}
+        >
           {/* User Info */}
-          <div className="px-4 py-2 border-b border-gray-200">
-            <p className="text-sm font-medium text-gray-700">John Doe</p>
-            <p className="text-xs text-gray-500">john@example.com</p>
+          <div className={`px-4 py-2 border-b ${themeStyles.borderColor}`}>
+            <p className={`text-sm font-medium ${themeStyles.text}`}>John Doe</p>
+            <p className={`text-xs ${themeStyles.subtext}`}>john@example.com</p>
           </div>
 
           {/* Menu Items */}
-          <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+          <button 
+            className={`w-full px-4 py-2 text-left text-sm ${themeStyles.text} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} flex items-center gap-2 transition-colors duration-150`}
             onClick={profileHandler}
           >
-            <User className="h-4 w-4" />
+            <User className={`h-4 w-4 ${themeStyles.iconColor}`} />
             Profile
           </button>
 
-          <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+          <button 
+            className={`w-full px-4 py-2 text-left text-sm ${themeStyles.text} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} flex items-center gap-2 transition-colors duration-150`}
             onClick={settingHandler}
           >
-            <Settings className="h-4 w-4" />
+            <Settings className={`h-4 w-4 ${themeStyles.iconColor}`} />
             Settings
           </button>
 
-          <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+          <button 
+            className={`w-full px-4 py-2 text-left text-sm ${themeStyles.text} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} flex items-center gap-2 transition-colors duration-150`}
             onClick={appointmentHandler}
           >
-            <Calendar className="h-4 w-4" />
+            <Calendar className={`h-4 w-4 ${themeStyles.iconColor}`} />
             Appointments
           </button>
 
-          <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+          <button 
+            className={`w-full px-4 py-2 text-left text-sm ${themeStyles.text} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} flex items-center gap-2 transition-colors duration-150`}
             onClick={helpHandler}
           >
-            <HelpCircle className="h-4 w-4" />
+            <HelpCircle className={`h-4 w-4 ${themeStyles.iconColor}`} />
             Help
           </button>
 
-          <div className="border-t border-gray-200">
-            <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
-              onClick={logoutEventHandler}>
+          <div className={`border-t ${themeStyles.borderColor}`}>
+            <button 
+              className={`w-full px-4 py-2 text-left text-sm ${isDarkMode ? 'text-red-400' : 'text-red-600'} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} flex items-center gap-2 transition-colors duration-150`}
+              onClick={logoutEventHandler}
+            >
               <LogOut className="h-4 w-4" />
               Logout
             </button>
