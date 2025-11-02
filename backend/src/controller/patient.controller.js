@@ -1,9 +1,9 @@
 import User from "../models/user.model.js";
-import Patient from "../models/patient.model.js";
-import Doctor from "../models/doctor.model.js";
+import { Patient } from "../models/patient.model.js";
+import { Doctor } from "../models/doctor.model.js";
 import { ObjectId } from "mongodb";
-import ApiErrors  from "../utils/ApiError.utils.js";
-import { ApiResponse } from "../utils/ApiResponse.utils.js";
+import { ApiErrors } from "../utilities/ApiError.js";
+import { ApiResponse } from "../utilities/ApiResponse.js";
 
 const PatientProfile = async (req, res) => {
     const id = req.user?._id || undefined;

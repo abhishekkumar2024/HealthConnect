@@ -1,10 +1,14 @@
-import {cloudinaryConfig as cloudinary} from "../config/cloudinary.config.js"
+import {v2 as cloudinary} from "cloudinary"
 import fs from "fs"
-import ApiErrors from "../utils/ApiError.utils.js";
+import { ApiErrors } from "./ApiError.js";
 
+  cloudinary.config({ 
+    cloud_name: process.env.cloud_name, 
+    api_key: process.env.api_key, 
+    api_secret: process.env.api_secret 
+  });
 
-
-export const uploadToCloudinary= async (cloudinary_Path)=>{
+  const cloudinaryFileUplodad= async (cloudinary_Path)=>{
     try {
          if (!cloudinary_Path) return null
         //console.log(cloudinary_Path,typeof cloudinary_Path)
@@ -28,14 +32,14 @@ export const uploadToCloudinary= async (cloudinary_Path)=>{
         return null
     }
   }
-export const cloudinaryDeleteFile=async(videoPublicId)=>{
+  const cloudinaryDeleteFile=async(videoPublicId)=>{
     cloudinary.api.delete_resources([videoPublicId], 
       { type: 'upload', resource_type: 'video' })
     .then(console.log('video is successfully deleted')).catch((error)=>{
       console.log(error)
     });
   }
-export const cloudinaryDeletePhoto=async(videoPublicId)=>{
+  const cloudinaryDeletePhoto=async(videoPublicId)=>{
     cloudinary.api.delete_resources([videoPublicId], 
       { type: 'upload', resource_type: 'image' })
     .then(console.log('photo is successfully deleted')).catch((error)=>{
@@ -43,3 +47,8 @@ export const cloudinaryDeletePhoto=async(videoPublicId)=>{
     });
   }
   
+  export {
+    cloudinaryFileUplodad,
+    cloudinaryDeleteFile,
+    cloudinaryDeletePhoto
+  }  

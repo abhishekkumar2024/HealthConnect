@@ -1,49 +1,87 @@
-// src/app.js
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import morgan from 'morgan';
-import routes from './routes/index.js';
-import { errorHandler } from './middleware/error.middleware.js';
-import { apiLimiter } from './middleware/rateLimit.middleware.js';
-import ApiErrors  from './utils/ApiError.utils.js';
-import { HTTP_STATUS } from './utils/constants.utils.js';
+import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
+import userRoutePath from "./routes/user.route.js";
+import admin from "firebase-admin";
+import { ApiErrors } from "./utilities/ApiError.js";
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
-
-// CORS
+// CORS Configuration
 app.use(
-  cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-    credentials: true,
-  })
+    cors({
+        origin: process.env.ORIGIN_DB, // Adjust for production if needed
+        credentials: true, // Allow cookies and credentials
+        methods: ["GET", "POST", "PUT", "DELETE"], // Allow specific HTTP methods
+        allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
+    })
 );
 
+// Firebase Admin SDK
+// admin.initializeApp({
+//   credential: admin.credential.applicationDefault(),
+//   // Add your Firebase project configuration here
+//   projectId: 'your-project-id'
+// });
+
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 app.use(cookieParser());
 
-// Request logging
-app.use(morgan('combined'));
-
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Rate limiting
-app.use('/api/', apiLimiter);
-
 // Routes
-app.use('/api/v1', routes);
+app.use("/api/v1/users", userRoutePath);
 
-// 404 handler
-app.all('*', (req, res, next) => {
-  next(new ApiErrors (`Route ${req.originalUrl} not found`, HTTP_STATUS.NOT_FOUND));
+// Enhanced Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error("Error:", err.message);
+
+    // Check if it's an instance of ApiErrors
+    if (err instanceof ApiErrors) {
+        return res.status(err.statuscode).json({
+            success: err.success,
+            message: err.message,
+            errors: err.Errors,
+            data: err.data || null,
+        });
+    }
+
+    // For unhandled errors, return a generic message
+    res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
 });
 
-// Global error handler
-app.use(errorHandler);
+// 404 Middleware
+app.use((req, res) => {
+    res.status(404).json({
+        error: "Not Found",
+        message: "The requested resource could not be found.",
+    });
+});
 
-export default app;
+// Unhandled Rejection Handling
+process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection:", reason);
+    // Optionally log and exit for critical issues
+});
+
+// Uncaught Exception Handling
+process.on("uncaughtException", (error) => {
+    console.error("Uncaught Exception:", error);
+    // Gracefully shut down or restart the server
+});
+
+// Graceful Shutdown
+process.on("SIGTERM", () => {
+    console.log("SIGTERM received. Closing server...");
+    app.close(() => {
+        console.log("Server closed.");
+        process.exit(0);
+    });
+});
+
+export { app };
