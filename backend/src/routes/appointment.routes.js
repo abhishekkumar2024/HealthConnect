@@ -1,26 +1,31 @@
 // src/routes/appointment.routes.js
-import express from 'express';
+import { Router } from 'express';
 import {
-  getAppointments,
-  initiateBooking,
-  confirmBooking,
+  requestAppointment,
+  confirmBookingFee,
+  doctorRespond,
+  completePayment,
+  getAppointmentDetails,
+  getUserAppointments,
+  cancelAppointment,
 } from '../controllers/appointment.controller.js';
-import { cancelAppointment } from '../controllers/refund.controller.js';
-import { authenticateUser } from '../middleware/auth.middleware.js';
-import { validate } from '../middleware/validation.middleware.js';
-import {
-  bookAppointmentSchema,
-  confirmAppointmentSchema,
-  cancelAppointmentSchema,
-} from '../validators/appointment.validator.js';
+import { authenticateUser, authorizeRoles } from '../middleware/auth.middleware.js';
 
-const router = express.Router();
+const router = Router();
 
 router.use(authenticateUser);
 
-router.get('/', getAppointments);
-router.post('/book', validate(bookAppointmentSchema), initiateBooking);
-router.post('/confirm', validate(confirmAppointmentSchema), confirmBooking);
-router.post('/:appointmentId/cancel', validate(cancelAppointmentSchema), cancelAppointment);
+// Patient actions
+router.post('/request', authorizeRoles('patient'), requestAppointment);
+router.post('/:id/confirm-booking-fee', authorizeRoles('patient'), confirmBookingFee);
+router.post('/:id/pay', authorizeRoles('patient'), completePayment);
+
+// Doctor actions
+router.put('/:id/respond', authorizeRoles('doctor'), doctorRespond);
+
+// Common actions
+router.get('/:id', getAppointmentDetails);
+router.get('/', getUserAppointments);
+router.post('/:id/cancel', authorizeRoles('patient', 'doctor'), cancelAppointment);
 
 export default router;

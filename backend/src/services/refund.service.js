@@ -45,7 +45,7 @@ class RefundService {
   }
 
   /**
-   * Get hours until appointment
+   * Get hours until appointment  
    */
   getHoursUntilAppointment(appointmentDate) {
     const now = new Date();

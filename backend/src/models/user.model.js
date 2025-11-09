@@ -119,6 +119,10 @@ const UserSchema = new mongoose.Schema(
             country: String,
             pincode: Number,
         },
+        hospitalname: {
+            type: String,
+            trim: true,
+        },
     },
     {
         timestamps: true,
@@ -214,6 +218,7 @@ UserSchema.methods.generateTokens = function () {
 };
 
 // ✅ Indexes
+UserSchema.index({ name: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ isVerified: 1 });
 UserSchema.index({ isBlocked: 1 });

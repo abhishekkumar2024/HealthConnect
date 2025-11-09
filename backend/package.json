@@ -15,7 +15,10 @@
     "prepare": "husky install"
   },
   "nodemonConfig": {
-    "watch": ["src", "server.js"],
+    "watch": [
+      "src",
+      "server.js"
+    ],
     "ext": "js,json",
     "ignore": [
       "src/**/*.test.js",
@@ -47,13 +50,14 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.4.1",
     "firebase-admin": "^13.0.2",
+    "fuse.js": "^7.1.0",
     "helmet": "^8.0.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^7.0.10", 
+    "nodemailer": "^7.0.10",
     "stripe": "^19.1.0",
     "twilio": "^5.4.0",
     "winston": "^3.17.0",

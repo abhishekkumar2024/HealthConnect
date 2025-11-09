@@ -2,9 +2,9 @@
 import Joi from 'joi';
 
 export const bookAppointmentSchema = Joi.object({
-  doctorId: Joi.string().required().messages({
-    'string.empty': 'Doctor ID is required',
-    'any.required': 'Doctor ID is required',
+  email: Joi.string().email().required().messages({
+    'string.email': 'Invalid email format',
+    'any.required': 'Email is required',
   }),
   appointmentDate: Joi.date().iso().greater('now').required().messages({
     'date.base': 'Invalid appointment date format',

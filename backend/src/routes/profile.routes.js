@@ -4,10 +4,6 @@ import {
   GetProfile,
   UpdateProfile,
 } from '../controllers/profile.controller.js';
-import {
-  PatientProfile,
-  SavePatientData,
-} from '../controllers/patient.controller.js';
 import { authenticateUser } from '../middleware/auth.middleware.js';
 import { upload } from '../middleware/multer.middleware.js';
 

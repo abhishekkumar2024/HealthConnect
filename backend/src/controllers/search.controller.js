@@ -1,69 +1,79 @@
-import User from "../models/user.model.js"
-import { ApiResponse } from "../utils/ApiResponse.utils.js";
-// ust path to your User model
+import mongoose from 'mongoose';
+import Doctor from '../models/doctor.model.js';
 
-/**
- * Search users with both full-text and partial (regex) support.
- * Also works for suggestions/autocomplete.
- *
- * @param {String} query - The search term
- * @param {Number} limit - Max number of results (default: 10)
- * @returns {Array} users
- */
-export const searchUsers = async (req, res) => {
+// Utility function to escape special regex characters in search text
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
 
-    const { searchText, location, Specilization, pg, pgS } = req.query
-    const page = parseInt(pg) || 1;
-    const pageSize = parseInt(pgS) || 10;
-    const skip = (page - 1) * pageSize;
+export const searchController = async (req, res) => {
+  try {
+    const { name, city, specialization, page, limit } = req.query;
 
-    try {
-        const skip = (page - 1) * pageSize;
-        
-        // Build query conditions
-        const conditions = [];
-        
-        // Name search condition
-        if (searchText) {
-            conditions.push({
-                $or: [
-                    { "name.firstName": { $regex: searchText, $options: "i" } },
-                    { "name.lastName": { $regex: searchText, $options: "i" } }
-                ]
-            });
-        }
-        
-        // Location search condition
-        if (location) {
-            conditions.push({
-                $or: [
-                    { "address.city": { $regex: location, $options: "i" } },
-                    { "address.state": { $regex: location, $options: "i" } },
-                    { "address.country": { $regex: location, $options: "i" } },
-                    { "address.pincode": { $regex: location, $options: "i" } }
-                ]
-            });
-        }
-        
-        // Specialization condition
-        if (Specilization) {
-            conditions.push({
-                Specialization: { $regex: Specilization, $options: "i" }
-            });
-        }
-        
-        const query = conditions.length > 0 ? { $and: conditions } : {};
-        const users = await User.find(query).select('-password -accessToken -refreshToken -isDeleted -isBlocked -isVerified -otp')
-            .skip(skip)
-            .limit(pageSize)
-            .lean();
-        
-        return res.status(200).json(new ApiResponse(200, users, "Search results fetched successfully."));
-    } catch (error) {
-        console.error('Search error:', error);
-        throw error;
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = Math.min(parseInt(limit, 10) || 20, 100);
+
+    // Build regex conditions for city and specialization only (skip name filtering here)
+    const matchQuery = {};
+    if (city) {
+      matchQuery['userInfo.address.city'] = { $regex: escapeRegex(city), $options: 'i' };
     }
+    if(name){
+        matchQuery['userInfo.name'] = { $regex: escapeRegex(name), $options: 'i' };
+    }
+    if (specialization) {
+      matchQuery.specialization = { $regex: escapeRegex(specialization), $options: 'i' };
+    }
+
+    // Aggregation pipeline with $lookup and $match for city/specialization
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userInfo',
+        },
+      },
+      { $unwind: '$userInfo' },
+      {
+        $match: Object.keys(matchQuery).length ? matchQuery : {},
+      },
+      {
+        $project: {
+          _id: 1,
+          specialization: 1,
+          experience: 1,
+          fees: 1,
+          'userInfo._id': 1,
+          'userInfo.name': 1,
+          'userInfo.email': 1,
+          'userInfo.address.city': 1,
+          'userInfo.phone': 1,
+        },
+      },
+    ];
+
+    // Apply pagination limits here to reduce data volume for fuzzy filtering
+    pipeline.push({ $skip: (pageNum - 1) * limitNum}); // Fetch extra for fuzzy filtering
+    pipeline.push({ $limit: limitNum});
+
+    const docs = await Doctor.aggregate(pipeline);
+
+    // Fuzzy filtering logic
+    const filteredResults = docs.filter((doc) => {
+      const nameMatch = name ? doc.userInfo.name.toLowerCase().includes(name.toLowerCase()) : true;
+      const cityMatch = city ? doc.userInfo.address.city.toLowerCase().includes(city.toLowerCase()) : true;
+      const specializationMatch = specialization ? doc.specialization.toLowerCase().includes(specialization.toLowerCase()) : true;
+      return nameMatch && cityMatch && specializationMatch;
+    });
+  
+    // Pagination on fuzzy filtered results
+    const paginatedResults = filteredResults.slice(0, limitNum);
+
+    return res.status(200).json({ data: paginatedResults, page: pageNum, limit: limitNum });
+  } catch (error) {
+    console.error('Search API error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };
-
-
-// export {searchUsers}

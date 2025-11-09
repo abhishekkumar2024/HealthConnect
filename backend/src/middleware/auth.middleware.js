@@ -39,3 +39,13 @@ export const authenticateUser = async (req, res, next) => {
     return next(error);
   }
 };
+
+export const authorizeRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    const userRole = req.user.role;
+    if (!allowedRoles.includes(userRole)) {
+      return next(new ApiErrors(403, "Forbidden: You do not have permission to access this resource"));
+    }
+    next();
+  };
+};
