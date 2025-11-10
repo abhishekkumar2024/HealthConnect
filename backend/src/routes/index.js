@@ -4,6 +4,7 @@ import authRoutes from './auth.routes.js';
 import profileRoutes from './profile.routes.js';
 import searchRoutes from './search.routes.js';
 import appointmentRoutes from './appointment.routes.js';
+import getdoctorRoutes from './getdoctor.routes.js';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/auth', authRoutes);
 router.use('/profile', profileRoutes);
 router.use('/search', searchRoutes);
 router.use('/appointments', appointmentRoutes);
+router.use('/doctors', getdoctorRoutes);
 
 export default router;

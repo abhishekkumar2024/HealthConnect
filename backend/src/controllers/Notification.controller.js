@@ -13,14 +13,13 @@ const transporter = nodemailer.createTransport({
 // Configure Twilio client
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-export const getNotifications = (req, res) => {
-    // Logic to fetch notifications for the user
+export const sendNotification = (req, res) => {
+  // Logic to fetch notifications for the user
     
 }
 
 export const markNotificationsAsRead = (req, res) => {
-    const notificationId = req.params.id;
-    // Logic to mark the notification as read
+  // Logic to mark the notification as read
 }
 
 export const sendMessageController = async (req, res) => {
