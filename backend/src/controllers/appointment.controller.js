@@ -547,11 +547,6 @@ function calculateFees(consultationFee = 500) {
 async function getAppointment(id) {
   const appointment = await Appointment.findById(id);
 
-  // add patient and doctor details to the appointment
-  console.log(`appointment: ${JSON.stringify(appointment)}`);
-  appointment.patientName = appointment.patientId.userId.name;
-  appointment.doctorName = appointment.doctorId.userId.name;
-
   if (!appointment) {
     throw new ApiErrors(
       'Appointment not found',
@@ -750,6 +745,5 @@ async function getDoctorAppointments(doctorId, type, status) {
   })
   .sort('-appointmentDate')
   .lean();
-  console.log(`appointments: ${JSON.stringify(appointments)}`);
   return appointments;
 }
