@@ -53,6 +53,23 @@ app.use('/api/', apiLimiter);
 // Routes
 app.use('/api/v1', routes);
 
+// Serve static files from frontend build
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+  
+  // Handle client-side routing
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api/')) {
+      res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+    }
+  });
+}
+
 // 404 handler
 app.all('*', (req, res, next) => {
   next(new ApiErrors (`Route ${req.originalUrl} not found`, HTTP_STATUS.NOT_FOUND));
