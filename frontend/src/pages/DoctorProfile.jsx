@@ -3,7 +3,20 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doctorService } from '../services/doctor.service.js';
 import { profileService } from '../services/profile.service.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Star, Clock, Calendar, GraduationCap } from 'lucide-react';
+import { 
+  Star, 
+  Clock, 
+  Calendar, 
+  GraduationCap, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Award, 
+  Languages,
+  CheckCircle,
+  XCircle,
+  User
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const DoctorProfile = () => {

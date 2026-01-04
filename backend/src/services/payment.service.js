@@ -20,6 +20,20 @@ class PaymentService {
   }
 
   /**
+   * Check if Stripe is configured
+   * @throws {ApiErrors} If Stripe is not configured
+   */
+  _checkStripeConfigured() {
+    if (!this.stripe) {
+      throw new ApiErrors(
+        'Payment service is not configured. Please configure Stripe credentials.',
+        HTTP_STATUS.SERVICE_UNAVAILABLE,
+        ERROR_CODES.SERVICE_UNAVAILABLE
+      );
+    }
+  }
+
+  /**
    * Create payment intent
    * @param {Number} amount - Amount in rupees/dollars (not cents)
    * @param {String} currency - Currency code (inr, usd, etc.)
@@ -28,6 +42,8 @@ class PaymentService {
    */
   async createPaymentIntent(amount, currency = 'inr', metadata = {}) {
     try {
+      this._checkStripeConfigured();
+
       // Validate amount
       if (!amount || amount <= 0) {
         throw new ApiErrors(
@@ -96,6 +112,8 @@ class PaymentService {
    */
   async verifyPayment(paymentIntentId) {
     try {
+      this._checkStripeConfigured();
+
       // Validate input
       if (!paymentIntentId) {
         throw new ApiErrors(
@@ -171,6 +189,8 @@ class PaymentService {
    */
   async refundPayment(paymentIntentId, amount = null, reason = 'requested_by_customer') {
     try {
+      this._checkStripeConfigured();
+
       if (!paymentIntentId) {
         throw new ApiErrors(
           'Payment intent ID is required',
@@ -240,6 +260,8 @@ class PaymentService {
    */
   async cancelPaymentIntent(paymentIntentId) {
     try {
+      this._checkStripeConfigured();
+
       if (!paymentIntentId) {
         throw new ApiErrors(
           'Payment intent ID is required',
@@ -288,6 +310,8 @@ class PaymentService {
    */
   async sendPayout(connectedAccountId, amount, currency = 'inr', metadata = {}) {
     try {
+      this._checkStripeConfigured();
+
       if (!connectedAccountId) {
         throw new ApiErrors(
           'Connected account ID is required',
@@ -371,6 +395,8 @@ class PaymentService {
     metadata = {}
   ) {
     try {
+      this._checkStripeConfigured();
+
       if (!connectedAccountId || !amount || amount <= 0) {
         throw new ApiErrors(
           'Invalid parameters',
@@ -432,6 +458,8 @@ class PaymentService {
    */
   async getPaymentIntent(paymentIntentId) {
     try {
+      this._checkStripeConfigured();
+
       if (!paymentIntentId) {
         throw new ApiErrors(
           'Payment intent ID is required',

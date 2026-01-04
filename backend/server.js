@@ -14,13 +14,16 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-// Connect to database
-connectDatabase();
+// Connect to database (non-blocking)
+connectDatabase().catch((err) => {
+  logger.error('Database connection failed, but server will continue:', err);
+});
 
 const PORT = process.env.PORT || 4000;
+const HOST = process.env.HOST || '0.0.0.0';
 
-const server = app.listen(PORT, () => {
-  logger.info(`🚀 Server running on port ${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  logger.info(`🚀 Server running on ${HOST}:${PORT}`);
   logger.info(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 

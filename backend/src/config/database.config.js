@@ -4,6 +4,11 @@ import logger from '../utils/logger.utils.js';
 
 const connectDatabase = async () => {
   try {
+    if (!process.env.MONGODB_URI) {
+      logger.warn('⚠️ MONGODB_URI not set, skipping database connection');
+      return;
+    }
+
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -21,7 +26,9 @@ const connectDatabase = async () => {
 
   } catch (error) {
     logger.error('❌ Database connection failed:', error);
-    process.exit(1);
+    // Don't exit process - let server start and retry connection
+    // In production, Railway will handle health checks
+    throw error;
   }
 };
 

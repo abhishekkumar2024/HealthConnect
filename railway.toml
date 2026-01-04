@@ -5,6 +5,6 @@ builder = "NIXPACKS"
 NODE_ENV = "production"
 
 [deploy]
-startCommand = "npm start"
+startCommand = "cd backend && npm start"
 healthcheckPath = "/api/v1/health"
 restartPolicyType = "ON_FAILURE"
