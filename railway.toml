@@ -1,8 +1,6 @@
 [build]
 builder = "NIXPACKS"
-
-[build.env]
-NODE_ENV = "production"
+buildCommand = "cd backend && npm install --omit=dev"
 
 [deploy]
 startCommand = "cd backend && npm start"
