@@ -11,8 +11,7 @@
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
-    "format": "prettier --write \"src/**/*.js\"",
-    "prepare": "husky install"
+    "format": "prettier --write \"src/**/*.js\""
   },
   "nodemonConfig": {
     "watch": [
