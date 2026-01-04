@@ -10,7 +10,7 @@ import ApiErrors from '../utils/ApiError.utils.js';
 import logger from '../utils/logger.utils.js';
 import catchAsync from '../utils/catchAsync.utils.js';
 import { HTTP_STATUS, ERROR_CODES } from '../utils/constants.utils.js';
-
+import mongoose from 'mongoose';
 // ==========================================
 // MAIN CONTROLLER FUNCTIONS
 // ==========================================
@@ -446,8 +446,12 @@ function validateRequestInput({ doctorEmail, appointmentDate, reason }) {
  * Get patient by user ID
  */
 async function getPatient(userId) {
-  const patient = await Patient.findOne({ userId }).select('_id').lean();
-
+  console.log(`userId: ${userId}`);
+  const patient = await Patient.findOne({
+    userId: new mongoose.Types.ObjectId(userId),
+  })
+    .select('_id')
+    .lean();
   if (!patient) {
     throw new ApiErrors(
       'Patient profile not found',
@@ -542,6 +546,11 @@ function calculateFees(consultationFee = 500) {
  */
 async function getAppointment(id) {
   const appointment = await Appointment.findById(id);
+
+  // add patient and doctor details to the appointment
+  console.log(`appointment: ${JSON.stringify(appointment)}`);
+  appointment.patientName = appointment.patientId.userId.name;
+  appointment.doctorName = appointment.doctorId.userId.name;
 
   if (!appointment) {
     throw new ApiErrors(
@@ -731,10 +740,16 @@ async function getDoctorAppointments(doctorId, type, status) {
   if (status) {
     filter.status = status;
   }
-
-  return Appointment.find(filter)
-    .populate('patientId', 'userId')
-    .populate('patientId.userId', 'name email')
-    .sort('-appointmentDate')
-    .lean();
+  const appointments = await Appointment.find(filter)
+  .populate({
+    path: 'patientId',
+    populate: {
+      path: 'userId',
+      select: 'name',
+    },
+  })
+  .sort('-appointmentDate')
+  .lean();
+  console.log(`appointments: ${JSON.stringify(appointments)}`);
+  return appointments;
 }

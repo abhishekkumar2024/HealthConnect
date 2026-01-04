@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doctorService } from '../services/doctor.service.js';
+import { profileService } from '../services/profile.service.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Star, Clock, Calendar, GraduationCap } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -11,17 +12,47 @@ const DoctorProfile = () => {
   const navigate = useNavigate();
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
 
   useEffect(() => {
     fetchDoctor();
-  }, [id]);
+  }, [id, user]);
 
   const fetchDoctor = async () => {
     try {
-      const response = await doctorService.getDoctors();
-      const foundDoctor = response.data?.find((d) => d._id === id);
-      setDoctor(foundDoctor);
+      // If no id param and user is a doctor, fetch their own profile
+      if (!id && user?.role === 'doctor') {
+        const identifier = user?.username || user?.email || user?._id || 'current';
+        const response = await profileService.getProfile(identifier);
+        const doctorData = response.data?.doctor;
+        if (doctorData) {
+          // Transform profile data to match doctor structure (same as from doctorService)
+          const doctorProfile = {
+            ...doctorData,
+            userId: response.data?.user,
+            _id: doctorData._id, // Doctor model has its own _id
+          };
+          setDoctor(doctorProfile);
+          setIsOwnProfile(true);
+        } else {
+          toast.error('Doctor profile not found');
+        }
+      } else if (id) {
+        // Fetch doctor by ID (viewing other doctor's profile or own profile via ID)
+        const response = await doctorService.getDoctors();
+        const foundDoctor = response.data?.find((d) => d._id === id);
+        if (foundDoctor) {
+          setDoctor(foundDoctor);
+          // Check if this is the current user's own profile
+          setIsOwnProfile(user?.role === 'doctor' && foundDoctor?.userId?._id === user?._id);
+        } else {
+          toast.error('Doctor not found');
+        }
+      } else {
+        toast.error('Doctor ID is required');
+      }
     } catch (error) {
+      console.error('Error fetching doctor:', error);
       toast.error('Failed to load doctor profile');
     } finally {
       setLoading(false);

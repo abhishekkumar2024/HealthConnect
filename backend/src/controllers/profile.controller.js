@@ -109,8 +109,17 @@ export const UpdateProfile = catchAsync(async (req, res) => {
     // Update both User and Role models in parallel
     const RoleModel = userRole === 'doctor' ? Doctor : Patient;
 
+    if (typeof req.body.timeSlots === "string") {
+        req.body.timeSlots = JSON.parse(req.body.timeSlots);
+      }
+    if (typeof req.body.education === "string") {
+        req.body.education = JSON.parse(req.body.education);
+      }
+    req.body.languages = JSON.parse(req.body.languages);
+    
     const [updatedUser, updatedRoleData] = await Promise.all([
         // Update User model
+        
         User.findByIdAndUpdate(
             userId,
             { $set: req.body },

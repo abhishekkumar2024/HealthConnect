@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { appointmentService } from '../services/appointment.service.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import PaymentModal from '../components/PaymentModal.jsx';
-import { Calendar, Clock, X, DollarSign, CreditCard } from 'lucide-react';
+import { Calendar, Clock, X, DollarSign, CreditCard, IndianRupee } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -234,6 +234,7 @@ const Appointments = () => {
         </div>
       ) : (
         <div className="space-y-4">
+          {console.log(`filteredAppointments: ${JSON.stringify(filteredAppointments)}`)}
           {filteredAppointments.map((appointment) => (
             <div key={appointment._id} className="card">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -249,15 +250,15 @@ const Appointments = () => {
                             if (user?.role === 'patient') {
                               // For patients: show doctor name
                               const doctorName = 
-                                appointment.doctorId?.userId?.name || 
-                                appointment.doctorId?.name || 
+                                appointment?.userId?.name || 
+                                appointment?.name || 
                                 'Unknown Doctor';
                               return doctorName;
                             } else {
                               // For doctors: show patient name
                               const patientName = 
-                                appointment.patientId?.userId?.name || 
-                                appointment.patientId?.name || 
+                                appointment.patientId.userId?.name || 
+                                appointment?.name || 
                                 'Unknown Patient';
                               return patientName;
                             }
@@ -311,7 +312,7 @@ const Appointments = () => {
                     </span>
                     {appointment.consultationFee && (
                       <span className="flex items-center space-x-1">
-                        <DollarSign className="w-4 h-4" />
+                        <IndianRupee  className="w-4 h-4" />
                         <span>₹{appointment.consultationFee}</span>
                       </span>
                     )}

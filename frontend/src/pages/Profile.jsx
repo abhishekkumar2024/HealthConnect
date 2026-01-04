@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { profileService } from '../services/profile.service.js';
-import { User, Mail, Phone, MapPin, Camera, Save } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Save, Stethoscope, GraduationCap, Clock, DollarSign, Award, Plus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Profile = () => {
@@ -23,6 +23,24 @@ const Profile = () => {
     },
     profilePicture: null,
     profilePicturePreview: '',
+    // Doctor-specific fields
+    specialization: '',
+    licenseNumber: '',
+    qualification: '',
+    experience: '',
+    consultationFee: '',
+    clinicAddress: {
+      street: '',
+      city: '',
+      state: '',
+      country: '',
+      pincode: '',
+    },
+    languages: [],
+    bio: '',
+    education: [],
+    timeSlots: [],
+    availability: true,
   });
 
   useEffect(() => {
@@ -51,7 +69,7 @@ const Profile = () => {
         console.log('Profile data loaded:', { profileData, roleData, merged: profile });
       }
       
-      setFormData({
+      const baseFormData = {
         name: profile.name || user?.name || '',
         email: profile.email || user?.email || '',
         phoneNumber: profile.phoneNumber || profile.phone || '',
@@ -68,7 +86,30 @@ const Profile = () => {
         },
         profilePicture: null,
         profilePicturePreview: profile.profilePicture || '',
-      });
+      };
+
+      // Add doctor-specific fields if user is a doctor
+      if (user?.role === 'doctor') {
+        baseFormData.specialization = roleData?.specialization || '';
+        baseFormData.licenseNumber = roleData?.licenseNumber || '';
+        baseFormData.qualification = roleData?.qualification || '';
+        baseFormData.experience = roleData?.experience || '';
+        baseFormData.consultationFee = roleData?.consultationFee || '';
+        baseFormData.clinicAddress = {
+          street: roleData?.clinicAddress?.street || '',
+          city: roleData?.clinicAddress?.city || '',
+          state: roleData?.clinicAddress?.state || '',
+          country: roleData?.clinicAddress?.country || '',
+          pincode: roleData?.clinicAddress?.pincode || roleData?.clinicAddress?.pincode?.toString() || '',
+        };
+        baseFormData.languages = Array.isArray(roleData?.languages) ? [...roleData.languages] : [];
+        baseFormData.bio = roleData?.bio || '';
+        baseFormData.education = Array.isArray(roleData?.education) ? roleData.education.map(edu => ({ ...edu })) : [];
+        baseFormData.timeSlots = Array.isArray(roleData?.timeSlots) ? roleData.timeSlots.map(slot => ({ ...slot })) : [];
+        baseFormData.availability = roleData?.availability !== undefined ? roleData.availability : true;
+      }
+      
+      setFormData(baseFormData);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
@@ -86,7 +127,8 @@ const Profile = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    
     if (name.startsWith('address.')) {
       const addressField = name.split('.')[1];
       setFormData({
@@ -96,12 +138,91 @@ const Profile = () => {
           [addressField]: value,
         },
       });
+    } else if (name.startsWith('clinicAddress.')) {
+      const addressField = name.split('.')[1];
+      setFormData({
+        ...formData,
+        clinicAddress: {
+          ...formData.clinicAddress,
+          [addressField]: value,
+        },
+      });
+    } else if (type === 'checkbox') {
+      setFormData({
+        ...formData,
+        [name]: checked,
+      });
     } else {
       setFormData({
         ...formData,
         [name]: value,
       });
     }
+  };
+
+  const handleLanguageAdd = () => {
+    const input = document.getElementById('languageInput');
+    const language = input?.value?.trim();
+    if (language && !formData.languages.includes(language)) {
+      setFormData({
+        ...formData,
+        languages: [...formData.languages, language],
+      });
+      input.value = '';
+    }
+  };
+
+  const handleLanguageRemove = (language) => {
+    setFormData({
+      ...formData,
+      languages: formData.languages.filter(l => l !== language),
+    });
+  };
+
+  const handleEducationAdd = () => {
+    setFormData({
+      ...formData,
+      education: [...formData.education, { degree: '', institution: '', year: '' }],
+    });
+  };
+
+  const handleEducationChange = (index, field, value) => {
+    const updatedEducation = [...formData.education];
+    updatedEducation[index] = { ...updatedEducation[index], [field]: value };
+    setFormData({
+      ...formData,
+      education: updatedEducation,
+    });
+  };
+
+  const handleEducationRemove = (index) => {
+    setFormData({
+      ...formData,
+      education: formData.education.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleTimeSlotAdd = () => {
+    setFormData({
+      ...formData,
+      timeSlots: [...formData.timeSlots, { day: 'monday', startTime: '', endTime: '', isAvailable: true }],
+    });
+  };
+
+  const handleTimeSlotChange = (index, field, value) => {
+    const updatedTimeSlots = [...formData.timeSlots];
+    updatedTimeSlots[index] = { ...updatedTimeSlots[index], [field]: value };
+    setFormData({
+      ...formData,
+      timeSlots: updatedTimeSlots,
+    });
+  };
+
+  const handleTimeSlotRemove = (index) => {
+    setFormData({
+      ...formData,
+      timeSlots: formData.timeSlots.filter((_, i) => i !== index),
+    });
   };
 
   const handleFileChange = (e) => {
@@ -140,6 +261,48 @@ const Profile = () => {
       updateData['address[country]'] = formData.address.country || '';
       updateData['address[pincode]'] = formData.address.pincode || '';
 
+      // Add doctor-specific fields if user is a doctor
+      if (user?.role === 'doctor') {
+        updateData.specialization = formData.specialization || null;
+        updateData.licenseNumber = formData.licenseNumber || null;
+        updateData.qualification = formData.qualification || null;
+        updateData.experience = formData.experience ? parseInt(formData.experience) : null;
+        updateData.consultationFee = formData.consultationFee ? parseFloat(formData.consultationFee) : null;
+        updateData.bio = formData.bio || null;
+        updateData.availability = formData.availability;
+        
+        // Clinic address
+        updateData['clinicAddress[street]'] = formData.clinicAddress.street || '';
+        updateData['clinicAddress[city]'] = formData.clinicAddress.city || '';
+        updateData['clinicAddress[state]'] = formData.clinicAddress.state || '';
+        updateData['clinicAddress[country]'] = formData.clinicAddress.country || '';
+        updateData['clinicAddress[pincode]'] = formData.clinicAddress.pincode || '';
+        
+        // Languages array
+        if (formData.languages.length > 0) {
+          updateData.languages = JSON.stringify(formData.languages);
+        }
+        
+        // Education array
+        if (formData.education.length > 0) {
+          updateData.education = JSON.stringify(formData.education.map(edu => ({
+            degree: edu.degree,
+            institution: edu.institution,
+            year: edu.year ? parseInt(edu.year) : null,
+          })));
+        }
+        
+        // Time slots array
+        if (formData.timeSlots.length > 0) {
+          updateData.timeSlots = JSON.stringify(formData.timeSlots.map(slot => ({
+            day: slot.day,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            isAvailable: slot.isAvailable !== false,
+          })));
+        }
+      }
+      console.log(`identifier: ${identifier}`);
       const response = await profileService.updateProfile(identifier, updateData);
       
       // Backend returns: { success: true, data: { user, [role]: roleData } }
@@ -175,8 +338,12 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-        <p className="text-gray-600 mt-2">Manage your personal information</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {user?.role === 'doctor' ? 'Doctor Profile' : 'My Profile'}
+        </h1>
+        <p className="text-gray-600 mt-2">
+          {user?.role === 'doctor' ? 'Manage your professional information' : 'Manage your personal information'}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="card space-y-6">
@@ -378,6 +545,374 @@ const Profile = () => {
             </div>
           </div>
         </div>
+
+        {/* Doctor-Specific Fields */}
+        {user?.role === 'doctor' && (
+          <>
+            {/* Professional Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Stethoscope className="w-5 h-5 mr-2" />
+                Professional Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-2">
+                    Specialization <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="specialization"
+                    name="specialization"
+                    required
+                    className="input-field"
+                    value={formData.specialization || ''}
+                    onChange={handleChange}
+                    placeholder="e.g., Cardiology, Pediatrics"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                    License Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="licenseNumber"
+                    name="licenseNumber"
+                    required
+                    className="input-field"
+                    value={formData.licenseNumber || ''}
+                    onChange={handleChange}
+                    placeholder="Enter license number"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="qualification" className="block text-sm font-medium text-gray-700 mb-2">
+                    <GraduationCap className="w-4 h-4 inline mr-2" />
+                    Qualification
+                  </label>
+                  <input
+                    type="text"
+                    id="qualification"
+                    name="qualification"
+                    className="input-field"
+                    value={formData.qualification || ''}
+                    onChange={handleChange}
+                    placeholder="e.g., MBBS, MD"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-2">
+                    Experience (Years)
+                  </label>
+                  <input
+                    type="number"
+                    id="experience"
+                    name="experience"
+                    min="0"
+                    max="60"
+                    className="input-field"
+                    value={formData.experience || ''}
+                    onChange={handleChange}
+                    placeholder="Years of experience"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="consultationFee" className="block text-sm font-medium text-gray-700 mb-2">
+                    <DollarSign className="w-4 h-4 inline mr-2" />
+                    Consultation Fee (₹)
+                  </label>
+                  <input
+                    type="number"
+                    id="consultationFee"
+                    name="consultationFee"
+                    min="0"
+                    className="input-field"
+                    value={formData.consultationFee || ''}
+                    onChange={handleChange}
+                    placeholder="Enter consultation fee"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="availability"
+                    name="availability"
+                    checked={formData.availability}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-primary-600 rounded"
+                  />
+                  <label htmlFor="availability" className="ml-2 text-sm font-medium text-gray-700">
+                    Available for appointments
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div>
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+                Bio
+              </label>
+              <textarea
+                id="bio"
+                name="bio"
+                rows="4"
+                maxLength="1000"
+                className="input-field"
+                value={formData.bio || ''}
+                onChange={handleChange}
+                placeholder="Tell patients about yourself..."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {formData.bio?.length || 0}/1000 characters
+              </p>
+            </div>
+
+            {/* Languages */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Languages Spoken
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {formData.languages.map((lang, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800"
+                  >
+                    {lang}
+                    <button
+                      type="button"
+                      onClick={() => handleLanguageRemove(lang)}
+                      className="ml-2 text-primary-600 hover:text-primary-800"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  id="languageInput"
+                  className="input-field flex-1"
+                  placeholder="Add a language"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleLanguageAdd();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleLanguageAdd}
+                  className="btn-secondary flex items-center space-x-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Education */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <GraduationCap className="w-5 h-5 mr-2" />
+                Education
+              </h3>
+              <div className="space-y-4">
+                {formData.education.map((edu, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
+                    <input
+                      type="text"
+                      placeholder="Degree"
+                      className="input-field"
+                      value={edu.degree || ''}
+                      onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Institution"
+                      className="input-field"
+                      value={edu.institution || ''}
+                      onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Year"
+                      className="input-field"
+                      value={edu.year || ''}
+                      onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleEducationRemove(index)}
+                      className="btn-secondary text-red-600 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4 inline mr-1" />
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleEducationAdd}
+                  className="btn-secondary flex items-center space-x-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Education</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Time Slots */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Clock className="w-5 h-5 mr-2" />
+                Availability Schedule
+              </h3>
+              <div className="space-y-4">
+                {formData.timeSlots.map((slot, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
+                    <select
+                      className="input-field"
+                      value={slot.day || 'monday'}
+                      onChange={(e) => handleTimeSlotChange(index, 'day', e.target.value)}
+                    >
+                      <option value="monday">Monday</option>
+                      <option value="tuesday">Tuesday</option>
+                      <option value="wednesday">Wednesday</option>
+                      <option value="thursday">Thursday</option>
+                      <option value="friday">Friday</option>
+                      <option value="saturday">Saturday</option>
+                      <option value="sunday">Sunday</option>
+                    </select>
+                    <input
+                      type="time"
+                      placeholder="Start Time"
+                      className="input-field"
+                      value={slot.startTime || ''}
+                      onChange={(e) => handleTimeSlotChange(index, 'startTime', e.target.value)}
+                    />
+                    <input
+                      type="time"
+                      placeholder="End Time"
+                      className="input-field"
+                      value={slot.endTime || ''}
+                      onChange={(e) => handleTimeSlotChange(index, 'endTime', e.target.value)}
+                    />
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={slot.isAvailable !== false}
+                        onChange={(e) => handleTimeSlotChange(index, 'isAvailable', e.target.checked)}
+                        className="w-4 h-4 text-primary-600 rounded mr-2"
+                      />
+                      Available
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleTimeSlotRemove(index)}
+                      className="btn-secondary text-red-600 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4 inline mr-1" />
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleTimeSlotAdd}
+                  className="btn-secondary flex items-center space-x-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Time Slot</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Clinic Address */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <MapPin className="w-5 h-5 mr-2" />
+                Clinic Address
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <label htmlFor="clinicAddress.street" className="block text-sm font-medium text-gray-700 mb-2">
+                    Street Address
+                  </label>
+                  <input
+                    type="text"
+                    id="clinicAddress.street"
+                    name="clinicAddress.street"
+                    className="input-field"
+                    value={formData.clinicAddress.street || ''}
+                    onChange={handleChange}
+                    placeholder="Enter clinic street address"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="clinicAddress.city" className="block text-sm font-medium text-gray-700 mb-2">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    id="clinicAddress.city"
+                    name="clinicAddress.city"
+                    className="input-field"
+                    value={formData.clinicAddress.city || ''}
+                    onChange={handleChange}
+                    placeholder="Enter city"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="clinicAddress.state" className="block text-sm font-medium text-gray-700 mb-2">
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    id="clinicAddress.state"
+                    name="clinicAddress.state"
+                    className="input-field"
+                    value={formData.clinicAddress.state || ''}
+                    onChange={handleChange}
+                    placeholder="Enter state"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="clinicAddress.country" className="block text-sm font-medium text-gray-700 mb-2">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    id="clinicAddress.country"
+                    name="clinicAddress.country"
+                    className="input-field"
+                    value={formData.clinicAddress.country || ''}
+                    onChange={handleChange}
+                    placeholder="Enter country"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="clinicAddress.pincode" className="block text-sm font-medium text-gray-700 mb-2">
+                    Pincode
+                  </label>
+                  <input
+                    type="text"
+                    id="clinicAddress.pincode"
+                    name="clinicAddress.pincode"
+                    className="input-field"
+                    value={formData.clinicAddress.pincode || ''}
+                    onChange={handleChange}
+                    placeholder="Enter pincode"
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Submit Button */}
         <div className="flex justify-end">
